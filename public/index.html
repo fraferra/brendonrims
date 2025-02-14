@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Classic Pac-Man Style</title>
+  <style>
+    body {
+      background-color: black;
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+    #usernamePrompt {
+      text-align: center;
+      margin-top: 50px;
+    }
+    #gameContainer {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    canvas {
+      background-color: black; /* black background for a retro arcade feel */
+      display: block;
+      margin: 0 auto;
+      border: 2px solid #000;
+    }
+    /* Optional on-screen controls for mobile */
+    #mobile-controls {
+      margin-top: 10px;
+    }
+    .control-btn {
+      font-size: 1.5rem;
+      padding: 0.5rem 1rem;
+      margin: 0.2rem;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="usernamePrompt">
+    <h1 style="color: yellow;">BRENDON-RIMS</h1>
+    <label style="color: white;">Enter Username:</label>
+    <input type="text" id="usernameInput" placeholder="Your name" />
+    <button id="startGame" style="color: #fff; background-color: #333; padding: 8px 16px; border: none; cursor: pointer;">
+      Start Game
+    </button>
+  </div>
+
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <!-- Optional mobile controls -->
+    <div id="mobile-controls">
+      <button class="control-btn" id="upBtn">↑</button><br/>
+      <button class="control-btn" id="leftBtn">←</button>
+      <button class="control-btn" id="rightBtn">→</button><br/>
+      <button class="control-btn" id="downBtn">↓</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

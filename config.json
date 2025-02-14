@@ -1,0 +1,5 @@
+{
+    "pacmanImage": "assets/custom_pacman.png",
+    "ghostImage": "assets/custom_ghost.png",
+    "pelletImage": "assets/custom_pellet.webp"
+  }
