@@ -44,6 +44,7 @@ const pellet = {
   height: 20
 };
 
+
 /*
   Walls array: 
   - Outer border: 20 px thick around a 800×600 canvas
@@ -345,10 +346,108 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Optional mobile controls
-document.getElementById('upBtn')?.addEventListener('touchstart', () => movePacman('up'));
-document.getElementById('downBtn')?.addEventListener('touchstart', () => movePacman('down'));
-document.getElementById('leftBtn')?.addEventListener('touchstart', () => movePacman('left'));
-document.getElementById('rightBtn')?.addEventListener('touchstart', () => movePacman('right'));
+// Desktop keydown event listener
+document.addEventListener('keydown', (e) => {
+    let direction = null;
+    switch (e.key) {
+      case 'ArrowUp':
+        direction = 'up';
+        break;
+      case 'ArrowDown':
+        direction = 'down';
+        break;
+      case 'ArrowLeft':
+        direction = 'left';
+        break;
+      case 'ArrowRight':
+        direction = 'right';
+        break;
+      default:
+        return;
+    }
+    movePacman(direction);
+  });
+  
+  // ***** New Mobile Control Code for Continuous Movement *****
+  let moveInterval = null;
+  
+  // Function to handle continuous movement while a button is pressed
+  function startMoving(direction) {
+    if (!moveInterval) {
+      moveInterval = setInterval(() => {
+        movePacman(direction);
+      }, 100); // Adjust this interval (in ms) for speed
+    }
+  }
+  
+  function stopMoving() {
+    clearInterval(moveInterval);
+    moveInterval = null;
+  }
+  
+  // Attach touch events for each control button
+  const upBtn = document.getElementById('upBtn');
+  const downBtn = document.getElementById('downBtn');
+  const leftBtn = document.getElementById('leftBtn');
+  const rightBtn = document.getElementById('rightBtn');
+  
+  if (upBtn) {
+    upBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startMoving('up');
+    });
+    upBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      stopMoving();
+    });
+  }
+  
+  if (downBtn) {
+    downBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startMoving('down');
+    });
+    downBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      stopMoving();
+    });
+  }
+  
+  if (leftBtn) {
+    leftBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startMoving('left');
+    });
+    leftBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      stopMoving();
+    });
+  }
+  
+  if (rightBtn) {
+    rightBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      startMoving('right');
+    });
+    rightBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      stopMoving();
+    });
+  }
+  // ***** End of New Mobile Control Code *****
+  
+  // Start game after username is entered
+  document.getElementById('startGame').addEventListener('click', () => {
+    const username = document.getElementById('usernameInput').value.trim();
+    if (username) {
+      document.getElementById('usernamePrompt').style.display = 'none';
+      document.getElementById('gameContainer').style.display = 'block';
+      startGame();
+    } else {
+      alert('Please enter a username.');
+    }
+  });
+  
 
 // Start game after username is entered
 document.getElementById('startGame').addEventListener('click', () => {
