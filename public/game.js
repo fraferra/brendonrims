@@ -2,8 +2,23 @@
  * CLASSIC PAC-MAN–INSPIRED GAME (ADAPTED FOR BIGGER SPRITES)
  * + Twilio SMS Logic on Win
  ******************************************************/
-require('dotenv').config();
-
+document.addEventListener('DOMContentLoaded', () => {
+    // All event listener registrations here
+    document.getElementById('startGame').addEventListener('click', () => {
+      console.log('Start button clicked');
+      const username = document.getElementById('usernameInput').value.trim();
+      if (username) {
+        document.getElementById('usernamePrompt').style.display = 'none';
+        document.getElementById('gameContainer').style.display = 'block';
+        startGame();
+      } else {
+        alert('Please enter a username.');
+      }
+    });
+    
+    // (Other event listeners for mobile controls, etc.)
+  });
+  
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
