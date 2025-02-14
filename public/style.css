@@ -41,13 +41,6 @@ body {
   /* Mobile Controls Styling */
 
   
-  #mobile-controls > div {
-    display: flex;
-    justify-content: space-between;
-    width: 200px;
-    margin-top: 10px;
-  }
-  
   
 
   /* Prevent zooming on buttons */
@@ -58,12 +51,11 @@ button, .control-btn {
   
   /* Mobile D-Pad styling */
   #mobile-controls {
-    position: fixed;
-    bottom: 20px;
+    position: absolute;
+    bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
-    text-align: center;
   }
   
   .dpad-row {
@@ -81,4 +73,15 @@ button, .control-btn {
     width: 60px;
     height: 60px;
   }
+  #gameContainer {
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative; /* for any absolutely positioned controls */
+  }
   
+  /* Make the canvas responsive */
+  #gameCanvas {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
