@@ -46,7 +46,7 @@ scaleCanvas();
 
 // Game variables
 let score = 0;
-const winScore = 5;  // Increase if you want a longer game
+const winScore = 1;  // Increase if you want a longer game
 let gameRunning = false;
 
 // Pac-Man object
