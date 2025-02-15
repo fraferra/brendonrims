@@ -92,8 +92,8 @@ const walls = [
   { x: 440, y: 240, width: 300, height: 20 },
 
   // Ghost house (center)
-  { x: 360, y: 280, width: 40, height: 20 },
-  { x: 440, y: 280, width: 40, height: 20 },
+//   { x: 360, y: 280, width: 40, height: 20 },
+//   { x: 440, y: 280, width: 40, height: 20 },
 //   { x: 330, y: 300, width: 20, height: 20 },
 //   { x: 480, y: 300, width: 20, height: 20 },
 
@@ -196,28 +196,36 @@ function movePacman(direction) {
   }
 }
 
-// Update ghost positions: simple chase toward Pac-Man, revert if hitting walls
-function updateGhosts() {
-  for (const ghost of ghosts) {
-    const prevX = ghost.x;
-    const prevY = ghost.y;
-
-    // Move ghost toward Pac-Man
-    if (ghost.x < pacman.x) ghost.x += ghost.speed;
-    if (ghost.x > pacman.x) ghost.x -= ghost.speed;
-    if (ghost.y < pacman.y) ghost.y += ghost.speed;
-    if (ghost.y > pacman.y) ghost.y -= ghost.speed;
-
-    // If ghost collides with walls, revert
-    for (const wall of walls) {
-      if (checkCollision(ghost, wall)) {
-        ghost.x = prevX;
-        ghost.y = prevY;
-        break;
+// function isGhostHouseTopWall(wall) {
+//     // We assume the ghost house top walls are exactly those at y=280 with a width of 40,
+//     // and positioned at x=360 or x=440.
+//     return wall.y === 280 && wall.width === 40 && (wall.x === 360 || wall.x === 440);
+//   }
+  
+  function updateGhosts() {
+    for (const ghost of ghosts) {
+      const prevX = ghost.x;
+      const prevY = ghost.y;
+  
+      // Move ghost toward Pac-Man
+      if (ghost.x < pacman.x) ghost.x += ghost.speed;
+      if (ghost.x > pacman.x) ghost.x -= ghost.speed;
+      if (ghost.y < pacman.y) ghost.y += ghost.speed;
+      if (ghost.y > pacman.y) ghost.y -= ghost.speed;
+  
+      // Check collision with walls.
+      // For each wall, if it is a ghost house top wall, skip collision check.
+      for (const wall of walls) {
+        // if (isGhostHouseTopWall(wall)) continue; // allow ghost to pass through ghost house top walls
+  
+        if (checkCollision(ghost, wall)) {
+          ghost.x = prevX;
+          ghost.y = prevY;
+          break;
+        }
       }
     }
   }
-}
 
 /********************
  * MAIN GAME LOGIC
