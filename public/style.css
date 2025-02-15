@@ -51,11 +51,14 @@ button, .control-btn {
   
   /* Mobile D-Pad styling */
   #mobile-controls {
-    position: absolute;
-    bottom: 50%; /* Adjust this value as needed */
+    position: fixed;
+    top: auto;
+    bottom: 25%; /* Adjust to place in bottom half */
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
+    display: block;
+    pointer-events: none; /* Allow clicks to pass through to the canvas */
   }
   
   .dpad-row {
@@ -63,8 +66,8 @@ button, .control-btn {
   }
   
   .control-btn {
-    background-color: #333;
-    color: #fff;
+    background-color: rgba(51, 51, 51, 0.7); /* Semi-opaque background */
+    color: rgba(255, 255, 255, 0.7); /* Semi-opaque text */
     border: none;
     border-radius: 5px;
     font-size: 24px;
@@ -72,10 +75,11 @@ button, .control-btn {
     margin: 5px;
     width: 60px;
     height: 60px;
+    pointer-events: auto; /* Enable clicks on the buttons */
   }
   #gameContainer {
-    max-width: 500px;
-    max-height: 200px;
+    /* max-width: 500px;
+    max-height: 200px; */
     margin: 0 auto;
     position: relative; /* for any absolutely positioned controls */
   }

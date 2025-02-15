@@ -23,7 +23,7 @@ app.use(express.static('public'));
 
 // Endpoint to send SMS when a player wins
 app.post('/win', async (req, res) => {
-    const smsMessage = 'Player just won the game! Congratulations!';
+    const smsMessage = req.body.message || 'Player just won the game! Congratulations!';
     console.log('Sending SMS:', smsMessage);
     console.log('To:', process.env.TARGET_NUMBER);
     console.log('From:', process.env.TEXTBELT_KEY );

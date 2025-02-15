@@ -63,8 +63,8 @@ const pacman = {
 const pellet = {
   x: 0,
   y: 0,
-  width: 20,
-  height: 20,
+  width: 30,
+  height: 30,
   // make it circular
   radius: 10,
 };
@@ -79,9 +79,9 @@ const pellet = {
 const walls = [
   // Outer border (20 px thick)
   { x: 0,   y: 0,   width: 800, height: 20  },
-  { x: 0,   y: 480, width: 800, height: 20  },
-  { x: 0,   y: 0,   width: 20,  height: 500 },
-  { x: 780, y: 0,   width: 20,  height: 500 },
+  { x: 0,   y: 680, width: 800, height: 20  },
+  { x: 0,   y: 0,   width: 20,  height: 700 },
+  { x: 780, y: 0,   width: 20,  height: 700 },
 
   // Horizontal walls
   { x: 60,  y: 80,  width: 300, height: 20 },
@@ -101,9 +101,9 @@ const walls = [
   { x: 60,  y: 380,  width: 300, height: 20 },
   { x: 440, y: 380,  width: 300, height: 20 },
   { x: 60,  y: 460, width: 300, height: 20 },
-  { x: 440, y: 460, width: 300, height: 20 }
-//   { x: 60,  y: 540, width: 300, height: 20 }
-//   { x: 440, y: 540, width: 300, height: 20 }
+  { x: 440, y: 460, width: 300, height: 20 },
+  { x: 60,  y: 540, width: 300, height: 20 },
+  { x: 440, y: 540, width: 300, height: 20 }
 ];
 
 // Ghosts: 40×40, placed inside the ghost house, with a bit faster speed
@@ -334,13 +334,17 @@ function endGame() {
   gameRunning = false;
   alert('Congratulations, you won!');
 
+  // Prompt the user for a custom message
+  const customMessage = prompt('Enter a custom message to send to Brendon and Emma!', 'Rim rim Brendon! It\'s wedding timeeee!');
+  const username = document.getElementById('usernameInput').value.trim();
+
   // Send a request to our backend to send the Twilio SMS
   fetch('/win', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      message: 'Player just won the game! Congratulations!',
-      username: document.getElementById('usernameInput').value.trim() // Include username in the request
+      message: customMessage,
+      username: username // Include username in the request
     })
   })
     .then(response => {
