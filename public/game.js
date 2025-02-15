@@ -46,7 +46,7 @@ scaleCanvas();
 
 // Game variables
 let score = 0;
-const winScore = 5;  // Increase if you want a longer game
+const winScore = 1;  // Increase if you want a longer game
 let gameRunning = false;
 
 // Pac-Man object
@@ -55,7 +55,8 @@ const pacman = {
   y: 120, // Safe starting Y
   width: 40,
   height: 40,
-  speed: 10 // Moves 10px per key press
+  speed: 10, // Moves 10px per key press
+  radius: 10,
 };
 
 // Pellet object
@@ -63,7 +64,9 @@ const pellet = {
   x: 0,
   y: 0,
   width: 20,
-  height: 20
+  height: 20,
+  // make it circular
+  radius: 10,
 };
 
 
@@ -76,9 +79,9 @@ const pellet = {
 const walls = [
   // Outer border (20 px thick)
   { x: 0,   y: 0,   width: 800, height: 20  },
-  { x: 0,   y: 580, width: 800, height: 20  },
-  { x: 0,   y: 0,   width: 20,  height: 600 },
-  { x: 780, y: 0,   width: 20,  height: 600 },
+  { x: 0,   y: 480, width: 800, height: 20  },
+  { x: 0,   y: 0,   width: 20,  height: 500 },
+  { x: 780, y: 0,   width: 20,  height: 500 },
 
   // Horizontal walls
   { x: 60,  y: 80,  width: 300, height: 20 },
@@ -91,16 +94,16 @@ const walls = [
   // Ghost house (center)
   { x: 360, y: 280, width: 40, height: 20 },
   { x: 440, y: 280, width: 40, height: 20 },
-  { x: 330, y: 300, width: 20, height: 20 },
-  { x: 480, y: 300, width: 20, height: 20 },
+//   { x: 330, y: 300, width: 20, height: 20 },
+//   { x: 480, y: 300, width: 20, height: 20 },
 
   // Add more walls as needed
   { x: 60,  y: 380,  width: 300, height: 20 },
   { x: 440, y: 380,  width: 300, height: 20 },
   { x: 60,  y: 460, width: 300, height: 20 },
-  { x: 440, y: 460, width: 300, height: 20 },
-  { x: 60,  y: 540, width: 300, height: 20 },
-  { x: 440, y: 540, width: 300, height: 20 }
+  { x: 440, y: 460, width: 300, height: 20 }
+//   { x: 60,  y: 540, width: 300, height: 20 }
+//   { x: 440, y: 540, width: 300, height: 20 }
 ];
 
 // Ghosts: 40×40, placed inside the ghost house, with a bit faster speed
@@ -108,23 +111,24 @@ const ghosts = [
   {
     x: 370,
     y: 320,
-    width: 40,
-    height: 40,
-    speed: 0.4
+    width: 30,
+    height: 30,
+    speed: 0.4,
+    radius: 20 // Add radius for rounded corners
   },
   {
     x: 420,
     y: 320,
-    width: 40,
-    height: 40,
-    speed: 0.4
+    width: 30,
+    height: 30,
+    speed: 0.4,
+    radius: 20 // Add radius for rounded corners
   }
 ];
 
 // Retro sprite placeholders (you can replace with actual images)
 const pacmanImg = new Image();
 pacmanImg.src = 'assets/custom_pacman.png';
-
 const ghostImg = new Image();
 ghostImg.src = 'assets/custom_ghost.png';
 

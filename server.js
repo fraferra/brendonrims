@@ -22,24 +22,41 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Endpoint to send SMS when a player wins
-app.post('/win', (req, res) => {
-  const smsMessage = req.body.message || 'Player just won the game! Congratulations!';
-
-  client.messages
-    .create({
-      body: smsMessage,
-      from: twilioNumber,
-      to: targetNumber
-    })
-    .then(message => {
-      console.log('SMS sent, SID:', message.sid);
-      res.json({ success: true, sid: message.sid });
-    })
-    .catch(error => {
+app.post('/win', async (req, res) => {
+    const smsMessage = 'Player just won the game! Congratulations!';
+    console.log('Sending SMS:', smsMessage);
+    console.log('To:', process.env.TARGET_NUMBER);
+    console.log('From:', process.env.TEXTBELT_KEY );
+    // Prepare POST data for Textbelt
+    const params = new URLSearchParams({
+      phone: process.env.TARGET_NUMBER,           // Set in your .env file (e.g., +15551234567)
+      message: smsMessage,
+      key: process.env.TEXTBELT_KEY || 'textbelt'   // Free key is 'textbelt'
+    });
+    
+    try {
+      const response = await fetch('https://textbelt.com/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('SMS sent successfully:', data);
+        res.json({ success: true });
+      } else {
+        console.error('Error sending SMS:', data);
+        res.status(500).json({ error: data.error });
+      }
+    } catch (error) {
       console.error('Error sending SMS:', error);
       res.status(500).json({ error: error.message });
-    });
-});
+    }
+  });
+  
+
 
 // Start the server
 app.listen(port, () => {

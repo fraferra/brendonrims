@@ -52,7 +52,7 @@ button, .control-btn {
   /* Mobile D-Pad styling */
   #mobile-controls {
     position: absolute;
-    bottom: -100px; /* Adjust this value as needed */
+    bottom: 50%; /* Adjust this value as needed */
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
@@ -75,6 +75,7 @@ button, .control-btn {
   }
   #gameContainer {
     max-width: 500px;
+    max-height: 200px;
     margin: 0 auto;
     position: relative; /* for any absolutely positioned controls */
   }
@@ -85,4 +86,8 @@ button, .control-btn {
     height: auto;
     display: block;
     position: relative;
+  }
+
+  img {
+    border-radius: 50%;
   }
