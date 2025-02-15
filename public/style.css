@@ -51,8 +51,8 @@ button, .control-btn {
   
   /* Mobile D-Pad styling */
   #mobile-controls {
-    position: absolute;
-    bottom: 150px;  /* Increased from 20px to 80px */
+    position: fixed;
+    bottom: 80px;  /* Adjust this value as needed */
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
