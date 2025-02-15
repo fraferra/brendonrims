@@ -52,7 +52,7 @@ button, .control-btn {
   /* Mobile D-Pad styling */
   #mobile-controls {
     position: fixed;
-    bottom: 80px;  /* Adjust this value as needed */
+    bottom: 250px;  /* Adjust this value as needed */
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
