@@ -46,7 +46,7 @@ scaleCanvas();
 
 // Game variables
 let score = 0;
-const winScore = 1;  // Increase if you want a longer game
+const winScore = 5;  // Increase if you want a longer game
 let gameRunning = false;
 
 // Pac-Man object
@@ -91,8 +91,16 @@ const walls = [
   // Ghost house (center)
   { x: 360, y: 280, width: 40, height: 20 },
   { x: 440, y: 280, width: 40, height: 20 },
-  { x: 330, y: 300, width: 20, height: 60 },
-  { x: 480, y: 300, width: 20, height: 60 }
+  { x: 330, y: 300, width: 20, height: 20 },
+  { x: 480, y: 300, width: 20, height: 20 },
+
+  // Add more walls as needed
+  { x: 60,  y: 380,  width: 300, height: 20 },
+  { x: 440, y: 380,  width: 300, height: 20 },
+  { x: 60,  y: 460, width: 300, height: 20 },
+  { x: 440, y: 460, width: 300, height: 20 },
+  { x: 60,  y: 540, width: 300, height: 20 },
+  { x: 440, y: 540, width: 300, height: 20 }
 ];
 
 // Ghosts: 40×40, placed inside the ghost house, with a bit faster speed
@@ -102,14 +110,14 @@ const ghosts = [
     y: 320,
     width: 40,
     height: 40,
-    speed: 0.6
+    speed: 0.4
   },
   {
     x: 420,
     y: 320,
     width: 40,
     height: 40,
-    speed: 0.6
+    speed: 0.4
   }
 ];
 
@@ -319,7 +327,8 @@ function endGame() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      message: 'Player just won the game! Congratulations!'
+      message: 'Player just won the game! Congratulations!',
+      username: document.getElementById('usernameInput').value.trim() // Include username in the request
     })
   })
     .then(response => {

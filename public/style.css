@@ -74,7 +74,7 @@ button, .control-btn {
     height: 60px;
   }
   #gameContainer {
-    max-width: 800px;
+    max-width: 500px;
     margin: 0 auto;
     position: relative; /* for any absolutely positioned controls */
   }
