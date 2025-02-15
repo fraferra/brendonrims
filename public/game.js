@@ -22,6 +22,28 @@ document.addEventListener('DOMContentLoaded', () => {
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Function to dynamically scale the canvas to fit the viewport
+function scaleCanvas() {
+  // Calculate the scale factor so that the canvas (800x600) fits within the viewport.
+  // We use Math.min to ensure both width and height fit.
+  const scale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
+
+  // Apply the CSS transform to scale the canvas
+  canvas.style.transform = 'scale(' + scale + ')';
+  canvas.style.transformOrigin = 'top left';
+  
+  // Optional: Adjust the canvas container's height so that scrolling is avoided
+  const container = document.getElementById('gameContainer');
+  if (container) {
+    container.style.width = 800 * scale + 'px';
+    container.style.height = 600 * scale + 'px';
+  }
+}
+
+// Call scaleCanvas on page load and whenever the window is resized
+window.addEventListener('resize', scaleCanvas);
+scaleCanvas();
+
 // Game variables
 let score = 0;
 const winScore = 5;  // Increase if you want a longer game
