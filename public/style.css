@@ -51,7 +51,7 @@ button, .control-btn {
   
   /* Mobile D-Pad styling */
   #mobile-controls {
-    position: fixed;
+    position: relative;
     top: auto;
     bottom: 25%; /* Adjust to place in bottom half */
     left: 50%;

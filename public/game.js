@@ -114,7 +114,6 @@ const ghosts = [
     width: 30,
     height: 30,
     speed: 0.4,
-    radius: 20 // Add radius for rounded corners
   },
   {
     x: 420,
@@ -122,7 +121,6 @@ const ghosts = [
     width: 30,
     height: 30,
     speed: 0.4,
-    radius: 20 // Add radius for rounded corners
   }
 ];
 
@@ -133,7 +131,8 @@ const ghostImg = new Image();
 ghostImg.src = 'assets/custom_ghost.png';
 
 const pelletImg = new Image();
-pelletImg.src = 'assets/custom_pellet.webp';
+pelletImg.src = 'assets/pellet.png';
+
 
 /********************
  * HELPER FUNCTIONS
@@ -148,6 +147,20 @@ function checkCollision(r1, r2) {
     r1.y + r1.height > r2.y
   );
 }
+
+function checkCollisionX(r1, r2) {
+    return (
+      r1.x < r2.x + r2.width &&
+      r1.x + r1.width > r2.x
+    );
+  }
+
+function checkCollisionY(r1, r2) {
+    return (
+        r1.y < r2.y + r2.height &&
+        r1.y + r1.height > r2.y
+    );
+  }
 
 // Randomly place the pellet in a location not colliding with walls
 function placePelletSafely() {
@@ -212,7 +225,7 @@ function movePacman(direction) {
       if (ghost.x > pacman.x) ghost.x -= ghost.speed;
       if (ghost.y < pacman.y) ghost.y += ghost.speed;
       if (ghost.y > pacman.y) ghost.y -= ghost.speed;
-  
+    //   console.log(prevX, ghost.x, prevY, ghost.y)
       // Check collision with walls.
       // For each wall, if it is a ghost house top wall, skip collision check.
       for (const wall of walls) {
@@ -223,6 +236,14 @@ function movePacman(direction) {
           ghost.y = prevY;
           break;
         }
+        // if (checkCollisionX(ghost, wall)) {
+        //     ghost.x = prevX;
+        //     // break;
+        //   }
+        // if (checkCollisionY(ghost, wall)) {
+        //     ghost.y = prevY;
+        //     // break;
+        //   }
       }
     }
   }
