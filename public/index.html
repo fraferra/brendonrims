@@ -1,74 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
   <meta charset="UTF-8" />
-  <title>BrendonRims Pac-Man Style</title>
-  <style>
-    body {
-      background-color: black;
-      margin: 0;
-      padding: 0;
-      font-family: sans-serif;
-    }
-    #usernamePrompt {
-      text-align: center;
-      margin-top: 50px;
-    }
-    #gameContainer {
-      display: none;
-      text-align: center;
-      margin-top: 20px;
-    }
-    canvas {
-      background-color: black; /* black background for a retro arcade feel */
-      display: block;
-      margin: 0 auto;
-      border: 2px solid #000;
-    }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>80s Arcade Landing</title>
 
-    .control-btn {
-      font-size: 1.5rem;
-      padding: 0.5rem 1rem;
-      margin: 0.2rem;
-      background-color: #333;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-    }
-  </style>
+  <!-- 8‑bit font -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- your neon‑arcade styles -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="usernamePrompt">
-    <h1 style="color: yellow;">BRENDON-RIMS</h1>
-    <h2 style="color: yellow;">we are back</h2>
-    <img src="assets/rims.GIF" alt="BrendonRims" style="width: 200px; height: 200px;" loop=infinite>
-    <br>
-    <label style="color: white;">Enter Username:</label>
-    <input type="text" id="usernameInput" placeholder="Your name" />
-    <button id="startGame" style="color: #fff; background-color: #333; padding: 8px 16px; border: none; cursor: pointer;">
-      Start Game
-    </button>
-    <p style="color: white;">Rim 3 assholes to WINNNNN (and send a congratulatory message to Dong and Emma)!<br>And don't get caught by Emma!<br>Use arrow keys to move. </p>
-  </div>
+  <div class="arcade-container">
+    <!-- USERNAME PROMPT OVERLAY -->
+    <div class="username-prompt" id="usernamePrompt">
+          <!-- HEADER -->
+    <header>
+      <h1>WELCOME TO THE ARCADE</h1>
+      <p>Get ready to play!</p>
+    </header>
 
-  <div id="gameContainer">
-    
-    <!-- Optional mobile controls -->
-    <div id="mobile-controls">
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-        <div class="dpad-row">
-          <button class="control-btn" id="upBtn">▲</button>
-        </div>
-        <div class="dpad-row">
-          <button class="control-btn" id="leftBtn">◀</button>
-          <button class="control-btn" id="downBtn">▼</button>
-          <button class="control-btn" id="rightBtn">▶</button>
-        </div>
+    <div class="sprite-container">
+      <video
+        class="sprite"
+        src="assets/retro.mp4"
+        autoplay
+        loop
+        muted
+        playsinline
+      ></video>
+    </div>
+
+      <div class="prompt-content">
+        <label for="usernameInput">ENTER YOUR NAME:</label>
+        <input
+          type="text"
+          id="usernameInput"
+          name="username"
+          required
+          placeholder="PLAYER 1"
+        />
+        <!-- Note: type="button" so it doesn't reload the page -->
+        <button
+          id="startGame"
+          type="button"
+          class="arcade-button"
+        >
+          START
+        </button>
       </div>
+    </div>
+
+
+    <!-- LOOPING SPRITE (VIDEO) -->
+
+
+    <!-- GAME AREA (hidden until you click START) -->
+    <div class="game-container" id="gameContainer">
+      <canvas id="gameCanvas" width="800" height="600"></canvas>
+      <div class="control-panel">
+        <button class="control-btn" id="leftBtn">◀</button>
+        <button class="control-btn" id="upBtn">▲</button>
+        <button class="control-btn" id="downBtn">▼</button>
+        <button class="control-btn" id="rightBtn">▶</button>
+      </div>
+    </div>
   </div>
 
+  <!-- your game logic + start-button handler -->
   <script src="game.js"></script>
 </body>
 </html>

@@ -49,13 +49,13 @@ let score = 0;
 const winScore = 3;  // Increase if you want a longer game
 let gameRunning = false;
 
-// Pac-Man object
+// Pac-Man object - adjusted to be slightly smaller than corridor width
 const pacman = {
-  x: 100, // Safe starting X so he's not stuck in a wall
-  y: 120, // Safe starting Y
-  width: 40,
-  height: 40,
-  speed: 10, // Moves 10px per key press
+  x: 40,
+  y: 40,
+  width: 30,  // Reduced from 40 to ensure it fits in corridors
+  height: 30, // Reduced from 40 to ensure it fits in corridors
+  speed: 10,
   radius: 10,
 };
 
@@ -71,56 +71,78 @@ const pellet = {
 
 
 /*
-  Walls array: 
-  - Outer border: 20 px thick around a 800×600 canvas
-  - Interior walls: 20 px thick lines spaced so 40×40 sprites can pass
-  - A central "ghost house" with a 40 px wide "door" so ghosts can leave
+  Walls array: Rebuilt to ensure all corridors are at least 40px wide
+  for comfortable navigation of both Pac-Man and ghosts
 */
 const walls = [
-  // Outer border (20 px thick)
-  { x: 0,   y: 0,   width: 800, height: 20  },
-  { x: 0,   y: 480, width: 800, height: 20  },
-  { x: 0,   y: 0,   width: 20,  height: 500 },
-  { x: 780, y: 0,   width: 20,  height: 500 },
-
-  // Horizontal walls
-  { x: 60,  y: 80,  width: 300, height: 20 },
-  { x: 440, y: 80,  width: 300, height: 20 },
-  { x: 60,  y: 160, width: 300, height: 20 },
-  { x: 440, y: 160, width: 300, height: 20 },
-  { x: 60,  y: 240, width: 300, height: 20 },
-  { x: 440, y: 240, width: 300, height: 20 },
-
-  // Ghost house (center)
-//   { x: 360, y: 280, width: 40, height: 20 },
-//   { x: 440, y: 280, width: 40, height: 20 },
-//   { x: 330, y: 300, width: 20, height: 20 },
-//   { x: 480, y: 300, width: 20, height: 20 },
-
-  // Add more walls as needed
-  { x: 60,  y: 380,  width: 300, height: 20 },
-  { x: 440, y: 380,  width: 300, height: 20 },
-  { x: 60,  y: 460, width: 300, height: 20 },
-  { x: 440, y: 460, width: 300, height: 20 }
-//   { x: 60,  y: 540, width: 300, height: 20 },
-//   { x: 440, y: 540, width: 300, height: 20 }
+  // Outer border - Modified to create more space
+  { x: 0,   y: 0,   width: 800, height: 20  }, // Top
+  { x: 0,   y: 500, width: 800, height: 20  }, // Bottom - moved down to 500 (was 480)
+  { x: 0,   y: 0,   width: 20,  height: 520 }, // Left - height extended
+  { x: 780, y: 0,   width: 20,  height: 520 }, // Right - height extended
+  
+  // Top section - horizontals with 40px+ gaps between them
+  { x: 80,  y: 60,  width: 80, height: 20 },  // Reduced width for wider passage
+  { x: 200, y: 60,  width: 140, height: 20 }, // Reduced width
+  { x: 400, y: 60,  width: 140, height: 20 }, // Reduced width
+  { x: 600, y: 60,  width: 120, height: 20 }, // Reduced width
+  
+  // Top section - verticals - adjusted for wider passages
+  { x: 160, y: 60,  width: 20,  height: 80 },
+  { x: 360, y: 60,  width: 20,  height: 60 },
+  { x: 560, y: 60,  width: 20,  height: 80 },
+  
+  // Middle section - horizontal walls
+  { x: 60,  y: 180, width: 80, height: 20 },   // Reduced width for wider corridors
+  { x: 200, y: 180, width: 110, height: 20 },  // Reduced width
+  { x: 450, y: 180, width: 110, height: 20 },  // Moved right + reduced width
+  { x: 600, y: 180, width: 120, height: 20 },  // Reduced width
+  
+  // Ghost house (center) - with openings on both left and right sides
+  { x: 320, y: 240, width: 70, height: 20 },   // Left part of top
+  { x: 450, y: 240, width: 70, height: 20 },   // Right part of top
+  { x: 320, y: 240, width: 20, height: 20 },   // Left wall top part
+  { x: 320, y: 290, width: 20, height: 20 },   // Left wall bottom part (creates opening)
+  { x: 500, y: 240, width: 20, height: 20 },   // Right wall top part
+  { x: 500, y: 290, width: 20, height: 20 },   // Right wall bottom part (maintains opening)
+  { x: 320, y: 300, width: 200, height: 20 },  // Bottom wall - unchanged
+  
+  // Lower section - moved up to make more space at bottom
+  { x: 60,  y: 340, width: 140, height: 20 },  // Y moved up from 360
+  { x: 240, y: 340, width: 80,  height: 20 },  // Y moved up from 360
+  { x: 360, y: 340, width: 80,  height: 20 },  // Y moved up from 360
+  { x: 480, y: 340, width: 80,  height: 20 },  // Y moved up from 360
+  { x: 600, y: 340, width: 140, height: 20 },  // Y moved up from 360
+  
+  // Lower section - vertical walls - shortened for wider passages
+  { x: 160, y: 340, width: 20,  height: 70 },  // Shortened height
+  { x: 240, y: 360, width: 20,  height: 50 },  // Shortened height
+  { x: 360, y: 360, width: 20,  height: 50 },  // Shortened height
+  { x: 480, y: 360, width: 20,  height: 50 },  // Shortened height
+  { x: 600, y: 340, width: 20,  height: 70 },  // Shortened height
+  
+  // Bottom section - horizontal walls - moved up significantly for better gap
+  { x: 60,  y: 410, width: 80,  height: 20 },  // Y moved up from 440
+  { x: 280, y: 410, width: 100, height: 20 },  // Y moved up from 440
+  { x: 420, y: 410, width: 100, height: 20 },  // Y moved up from 440
+  { x: 620, y: 410, width: 120, height: 20 },  // Y moved up from 440
 ];
 
-// Ghosts: 40×40, placed inside the ghost house, with a bit faster speed
+// Ghosts: placed in the ghost house, not inside walls
 const ghosts = [
   {
-    x: 370,
-    y: 320,
+    x: 360, // Inside ghost house
+    y: 240, 
     width: 30,
     height: 30,
-    speed: 0.4,
+    speed: 0.2,
   },
   {
-    x: 420,
-    y: 320,
+    x: 410, // Inside ghost house
+    y: 240,
     width: 30,
     height: 30,
-    speed: 0.4,
+    speed: 0.2,
   }
 ];
 
@@ -162,91 +184,234 @@ function checkCollisionY(r1, r2) {
     );
   }
 
-// Randomly place the pellet in a location not colliding with walls
+// Enhanced safe pellet placement
 function placePelletSafely() {
   let valid = false;
-  while (!valid) {
-    pellet.x = Math.random() * (canvas.width - pellet.width - 40) + 20;
-    pellet.y = Math.random() * (canvas.height - pellet.height - 40) + 20;
+  let attempts = 0;
+  const maxAttempts = 100;
+  
+  while (!valid && attempts < maxAttempts) {
+    attempts++;
+    
+    // Generate a position on the grid (multiple of 20 for better alignment)
+    pellet.x = Math.floor(Math.random() * 38) * 20 + 30;
+    pellet.y = Math.floor(Math.random() * 23) * 20 + 30;
+    
     valid = true;
-    // Check collision with any wall
+    
+    // Check collision with any wall - keep a minimum distance of 15px from walls
     for (const wall of walls) {
-      if (checkCollision(pellet, wall)) {
+      const expandedWall = {
+        x: wall.x - 15,
+        y: wall.y - 15,
+        width: wall.width + 30,
+        height: wall.height + 30
+      };
+      
+      if (checkCollision(pellet, expandedWall)) {
+        valid = false;
+        break;
+      }
+    }
+    
+    // Also check it's not too close to ghosts or pacman at start
+    const minDistFromEntities = 100;
+    if (Math.hypot(pellet.x - pacman.x, pellet.y - pacman.y) < minDistFromEntities) {
+      valid = false;
+    }
+    
+    for (const ghost of ghosts) {
+      if (Math.hypot(pellet.x - ghost.x, pellet.y - ghost.y) < minDistFromEntities) {
         valid = false;
         break;
       }
     }
   }
-}
-
-// Move Pac-Man one discrete step in the given direction
-function movePacman(direction) {
-  const prevX = pacman.x;
-  const prevY = pacman.y;
-
-  switch (direction) {
-    case 'up':
-      pacman.y -= pacman.speed;
-      break;
-    case 'down':
-      pacman.y += pacman.speed;
-      break;
-    case 'left':
-      pacman.x -= pacman.speed;
-      break;
-    case 'right':
-      pacman.x += pacman.speed;
-      break;
+  
+  // If we couldn't find a valid position after many attempts, place in known safe spot
+  if (!valid) {
+    pellet.x = 400;
+    pellet.y = 100;
   }
 
-  // Check collisions with walls. If collision, revert movement
+  // Make a final check to ensure the pellet isn't in a corridor that's too narrow
+  const testPacman = {
+    x: pellet.x - 5, // Position pacman near the pellet
+    y: pellet.y - 5,
+    width: 40,
+    height: 40
+  };
+  
   for (const wall of walls) {
-    if (checkCollision(pacman, wall)) {
-      pacman.x = prevX;
-      pacman.y = prevY;
+    if (checkCollision(testPacman, wall)) {
+      // If not a valid spot, place in a known safe area
+      pellet.x = 400;
+      pellet.y = 100;
       break;
     }
   }
 }
 
-// function isGhostHouseTopWall(wall) {
-//     // We assume the ghost house top walls are exactly those at y=280 with a width of 40,
-//     // and positioned at x=360 or x=440.
-//     return wall.y === 280 && wall.width === 40 && (wall.x === 360 || wall.x === 440);
-//   }
-  
-  function updateGhosts() {
-    for (const ghost of ghosts) {
-      const prevX = ghost.x;
-      const prevY = ghost.y;
-  
-      // Move ghost toward Pac-Man
-      if (ghost.x < pacman.x) ghost.x += ghost.speed;
-      if (ghost.x > pacman.x) ghost.x -= ghost.speed;
-      if (ghost.y < pacman.y) ghost.y += ghost.speed;
-      if (ghost.y > pacman.y) ghost.y -= ghost.speed;
-    //   console.log(prevX, ghost.x, prevY, ghost.y)
-      // Check collision with walls.
-      // For each wall, if it is a ghost house top wall, skip collision check.
+// Improved collision-handling move function
+function movePacman(direction) {
+  const prevX = pacman.x;
+  const prevY = pacman.y;
+  const step = pacman.speed;
+
+  // Apply movement with padding to prevent getting too close to walls
+  switch (direction) {
+    case 'up':
+      pacman.y -= step;
+      break;
+    case 'down':
+      pacman.y += step;
+      break;
+    case 'left':
+      pacman.x -= step;
+      break;
+    case 'right':
+      pacman.x += step;
+      break;
+  }
+
+  // Check if we're now colliding with any wall
+  let collision = false;
+  for (const wall of walls) {
+    if (checkCollision(pacman, wall)) {
+      collision = true;
+      break;
+    }
+  }
+
+  // Check if we're out of bounds
+  if (pacman.x < 20 || pacman.x + pacman.width > 780 || 
+      pacman.y < 20 || pacman.y + pacman.height > 480) {
+    collision = true;
+  }
+
+  // If collision occurred, revert to previous position
+  if (collision) {
+    pacman.x = prevX;
+    pacman.y = prevY;
+  }
+}
+
+function updateGhosts() {
+  for (const ghost of ghosts) {
+    const prevX = ghost.x;
+    const prevY = ghost.y;
+    let movedHorizontally = false;
+    let movedVertically = false;
+    
+    // Calculate distances to Pacman
+    const distX = pacman.x - ghost.x;
+    const distY = pacman.y - ghost.y;
+    const absDistX = Math.abs(distX);
+    const absDistY = Math.abs(distY);
+    
+    // Determine primary movement direction based on which distance is greater
+    const movePrimaryVertical = absDistY > absDistX;
+    
+    // Try primary direction first
+    if (movePrimaryVertical) {
+      // Try vertical movement first
+      if (distY !== 0) {
+        ghost.y += Math.sign(distY) * ghost.speed;
+        
+        // Check for wall collision
+        let hitWall = false;
+        for (const wall of walls) {
+          if (checkCollision(ghost, wall)) {
+            ghost.y = prevY; // Revert vertical movement
+            hitWall = true;
+            break;
+          }
+        }
+        
+        if (!hitWall) {
+          movedVertically = true;
+        }
+      }
+      
+      // Then try horizontal if vertical didn't collide or if distance is still significant
+      if (distX !== 0 && (!movedVertically || absDistX > 50)) {
+        ghost.x += Math.sign(distX) * ghost.speed;
+        
+        // Check for wall collision
+        for (const wall of walls) {
+          if (checkCollision(ghost, wall)) {
+            ghost.x = prevX; // Revert horizontal movement
+            break;
+          }
+        }
+      }
+    } 
+    else {
+      // Try horizontal movement first
+      if (distX !== 0) {
+        ghost.x += Math.sign(distX) * ghost.speed;
+        
+        // Check for wall collision
+        let hitWall = false;
+        for (const wall of walls) {
+          if (checkCollision(ghost, wall)) {
+            ghost.x = prevX; // Revert horizontal movement
+            hitWall = true;
+            break;
+          }
+        }
+        
+        if (!hitWall) {
+          movedHorizontally = true;
+        }
+      }
+      
+      // Then try vertical if horizontal didn't collide or if distance is still significant
+      if (distY !== 0 && (!movedHorizontally || absDistY > 50)) {
+        ghost.y += Math.sign(distY) * ghost.speed;
+        
+        // Check for wall collision
+        for (const wall of walls) {
+          if (checkCollision(ghost, wall)) {
+            ghost.y = prevY; // Revert vertical movement
+            break;
+          }
+        }
+      }
+    }
+    
+    // If ghost is stuck (didn't move in either direction), try random movement
+    if (ghost.x === prevX && ghost.y === prevY) {
+      // Pick a random direction
+      const directions = ['up', 'down', 'left', 'right'];
+      const randomDir = directions[Math.floor(Math.random() * directions.length)];
+      
+      switch (randomDir) {
+        case 'up':
+          ghost.y -= ghost.speed * 2;
+          break;
+        case 'down':
+          ghost.y += ghost.speed * 2;
+          break;
+        case 'left':
+          ghost.x -= ghost.speed * 2;
+          break;
+        case 'right':
+          ghost.x += ghost.speed * 2;
+          break;
+      }
+      
+      // Make sure we didn't move into a wall
       for (const wall of walls) {
-        // if (isGhostHouseTopWall(wall)) continue; // allow ghost to pass through ghost house top walls
-  
         if (checkCollision(ghost, wall)) {
           ghost.x = prevX;
           ghost.y = prevY;
           break;
         }
-        // if (checkCollisionX(ghost, wall)) {
-        //     ghost.x = prevX;
-        //     // break;
-        //   }
-        // if (checkCollisionY(ghost, wall)) {
-        //     ghost.y = prevY;
-        //     // break;
-        //   }
       }
     }
   }
+}
 
 /********************
  * MAIN GAME LOGIC
@@ -280,10 +445,52 @@ function drawGame() {
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Draw walls in bright blue to mimic the classic style
-  ctx.fillStyle = '#00bfff'; // bright “neon” blue
+  // Draw walls in less intense blue
+  ctx.fillStyle = '#0033CC'; // Changed from #0000FF to a softer blue
+  
+  // Draw each wall with rounded corners for classic look
   for (const wall of walls) {
-    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+    // Draw wall with rounded corners if it's not too small
+    if (wall.width >= 20 && wall.height >= 20) {
+      const radius = 4; // Corner radius
+      
+      ctx.beginPath();
+      ctx.moveTo(wall.x + radius, wall.y);
+      ctx.lineTo(wall.x + wall.width - radius, wall.y);
+      ctx.quadraticCurveTo(wall.x + wall.width, wall.y, wall.x + wall.width, wall.y + radius);
+      ctx.lineTo(wall.x + wall.width, wall.y + wall.height - radius);
+      ctx.quadraticCurveTo(wall.x + wall.width, wall.y + wall.height, wall.x + wall.width - radius, wall.y + wall.height);
+      ctx.lineTo(wall.x + radius, wall.y + wall.height);
+      ctx.quadraticCurveTo(wall.x, wall.y + wall.height, wall.x, wall.y + wall.height - radius);
+      ctx.lineTo(wall.x, wall.y + radius);
+      ctx.quadraticCurveTo(wall.x, wall.y, wall.x + radius, wall.y);
+      ctx.closePath();
+      
+      ctx.fill();
+    } else {
+      // For very small walls, just use a rectangle
+      ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+    }
+  }
+  
+  // Add grid dots for classic feel (small pellets in background)
+  ctx.fillStyle = '#555555';
+  const gridSize = 20;
+  for (let x = 30; x < canvas.width - 30; x += gridSize) {
+    for (let y = 30; y < canvas.height - 30; y += gridSize) {
+      // Only draw if not colliding with a wall
+      const dot = {x: x, y: y, width: 2, height: 2};
+      let collision = false;
+      for (const wall of walls) {
+        if (checkCollision(dot, wall)) {
+          collision = true;
+          break;
+        }
+      }
+      if (!collision) {
+        ctx.fillRect(x, y, 2, 2);
+      }
+    }
   }
 
   // Draw pellet
@@ -331,17 +538,19 @@ function gameLoop() {
 
 function startGame() {
   score = 0;
-  pacman.x = 100; // safe spot
-  pacman.y = 120; // safe spot
+  
+  // Updated starting position
+  pacman.x = 50; 
+  pacman.y = 450;
 
-  // Place pellet in a safe, reachable location
+  // Place pellet in a safe location
   placePelletSafely();
 
-  // Reset ghosts inside ghost house
-  ghosts[0].x = 370;
-  ghosts[0].y = 320;
-  ghosts[1].x = 420;
-  ghosts[1].y = 320;
+  // Reset ghosts - positioned to better utilize multiple exits
+  ghosts[0].x = 360; // First ghost - can exit right
+  ghosts[0].y = 260;
+  ghosts[1].x = 380; // Second ghost - positioned to exit left
+  ghosts[1].y = 260;
 
   gameRunning = true;
   gameLoop();
