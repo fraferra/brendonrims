@@ -384,7 +384,7 @@ function endGame() {
 
 function gameOver() {
   gameRunning = false;
-  alert('Game Over! A ghost caught you.');
+  alert('Game Over! An EMMA caught you.');
 }
 
 /********************
