@@ -221,7 +221,7 @@ const ghosts = [
 },
 {
   x: 410, // Inside ghost house
-  y: 240,
+  y: 260,
   width: 30,
   height: 30,
   speed: 0.15,

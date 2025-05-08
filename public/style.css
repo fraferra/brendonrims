@@ -214,7 +214,7 @@ p {
   
   .game-container {
     width: 100%;
-    height: calc(100vh - 10vh);
+    height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
