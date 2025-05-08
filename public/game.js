@@ -221,7 +221,7 @@ function scaleCanvas() {
   } else {
     // Desktop scaling - also increase by 15% for consistency
     const baseScale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
-    const scale = baseScale * 1.10;
+    const scale = baseScale * 1.15;
     
     canvas.style.position = 'absolute';
     canvas.style.left = '50%';

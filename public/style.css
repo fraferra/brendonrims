@@ -225,7 +225,7 @@ p {
   
   #gameCanvas {
     max-width: 100%; /* Make sure canvas doesn't overflow horizontally */
-    height: 90vh; /* Fixed height instead of max-height for better control */
+    height: 70vh; /* Fixed height instead of max-height for better control */
     margin: 0;
     position: relative;
     border-width: 1px; /* Thinner border to save space */
