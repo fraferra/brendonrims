@@ -31,50 +31,48 @@ return window.innerWidth <= 768 ||
 
 // Mobile-oriented maze layout - taller than it is wide
 const mobileWalls = [
-// Outer border
+// Outer border - use full width of 550 and extend height to 800
 { x: 0,   y: 0,   width: 550, height: 20 },  // Top
-{ x: 0,   y: 760, width: 550, height: 20 },  // Bottom 
-{ x: 0,   y: 0,   width: 20,  height: 780 }, // Left
-{ x: 530, y: 0,   width: 20,  height: 780 }, // Right
+{ x: 0,   y: 780, width: 550, height: 20 },  // Bottom - moved down
+{ x: 0,   y: 0,   width: 20,  height: 800 }, // Left - increased height
+{ x: 530, y: 0,   width: 20,  height: 800 }, // Right - increased height
 
-// Top section
-{ x: 60,  y: 60,  width: 100, height: 20 },
-{ x: 200, y: 60,  width: 250, height: 20 },
-{ x: 60,  y: 120, width: 60,  height: 20 },
-{ x: 160, y: 120, width: 290, height: 20 },
+// Top section - widened to use more horizontal space
+{ x: 60,  y: 60,  width: 120, height: 20 },  // Wider
+{ x: 220, y: 60,  width: 250, height: 20 },  // Moved right slightly
+{ x: 60,  y: 120, width: 80,  height: 20 },  // Wider
+{ x: 180, y: 120, width: 290, height: 20 },  // Moved right for wider passage
 
-// Vertical dividers
-{ x: 160, y: 60,  width: 20,  height: 60 },
-{ x: 330, y: 140, width: 20,  height: 180 },
-{ x: 120, y: 180, width: 20,  height: 180 },
-{ x: 240, y: 260, width: 20,  height: 160 },
+// Vertical dividers - adjusted positions
+{ x: 180, y: 60,  width: 20,  height: 60 },  // Moved right
+{ x: 350, y: 140, width: 20,  height: 180 }, // Moved right
+{ x: 120, y: 180, width: 20,  height: 180 }, // Unchanged
+{ x: 260, y: 260, width: 20,  height: 160 }, // Moved right
 
-// Middle section with passages
-{ x: 60,  y: 180, width: 60,  height: 20 },
-{ x: 140, y: 180, width: 250, height: 20 },
-{ x: 60,  y: 260, width: 170, height: 20 },
-{ x: 260, y: 260, width: 210, height: 20 },
+// Middle section with passages - adjusted for better spacing
+{ x: 60,  y: 180, width: 60,  height: 20 },  // Unchanged
+{ x: 140, y: 180, width: 270, height: 20 },  // Wider
+{ x: 60,  y: 260, width: 180, height: 20 },  // Wider
+{ x: 280, y: 260, width: 190, height: 20 },  // Adjusted position
 
-// Ghost house - with openings on both sides
-{ x: 160, y: 360, width: 60,  height: 20 },  // Top left
-{ x: 260, y: 360, width: 60,  height: 20 },  // Top right
-{ x: 160, y: 360, width: 20,  height: 20 },  // Left top
-// { x: 160, y: 410, width: 20,  height: 10 },  // Left bottom
-{ x: 300, y: 360, width: 20,  height: 20 },  // Right top
-// { x: 300, y: 410, width: 20,  height: 10 },  // Right bottom
-{ x: 160, y: 430, width: 160, height: 20 },  // Bottom
+// Ghost house - with openings on both sides - centered better
+{ x: 180, y: 380, width: 60,  height: 20 },  // Top left - moved down for better distribution
+{ x: 280, y: 380, width: 60,  height: 20 },  // Top right - moved down
+{ x: 180, y: 380, width: 20,  height: 20 },  // Left top - moved down
+{ x: 320, y: 380, width: 20,  height: 20 },  // Right top - moved down
+{ x: 180, y: 450, width: 160, height: 20 },  // Bottom - moved down and wider
 
-// Lower section
-{ x: 60,  y: 500, width: 160, height: 20 },
-{ x: 260, y: 500, width: 210, height: 20 },
-{ x: 120, y: 500, width: 20,  height: 100 },
-{ x: 380, y: 500, width: 20,  height: 100 },
-{ x: 60,  y: 600, width: 200, height: 20 },
-{ x: 300, y: 600, width: 170, height: 20 },
+// Lower section - adjusted positions to spread vertically
+{ x: 60,  y: 520, width: 160, height: 20 },  // Moved down
+{ x: 260, y: 520, width: 210, height: 20 },  // Moved down
+{ x: 120, y: 520, width: 20,  height: 100 }, // Moved down
+{ x: 380, y: 520, width: 20,  height: 100 }, // Moved down
+{ x: 60,  y: 620, width: 200, height: 20 },  // Moved down
+{ x: 300, y: 620, width: 170, height: 20 },  // Moved down
 
-// Bottom section with wider corridors
-{ x: 60,  y: 680, width: 140, height: 20 },
-{ x: 240, y: 680, width: 230, height: 20 },
+// Bottom section with wider corridors - moved down to use more vertical space
+{ x: 60,  y: 700, width: 140, height: 20 },  // Moved down
+{ x: 240, y: 700, width: 230, height: 20 },  // Moved down
 ];
 
 // Desktop-oriented maze layout (our existing walls array)
