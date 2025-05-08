@@ -270,24 +270,37 @@ function checkCollisionY(r1, r2) {
 function placePelletSafely() {
   let valid = false;
   let attempts = 0;
-  const maxAttempts = 100;
+  const maxAttempts = 200; // Increased attempts for better chances
+  const wallPadding = 20; // Increased padding from 15px to 20px
+  
+  // Set bounds based on current layout
+  const bounds = isMobile() ? 
+    { minX: 40, maxX: 490, minY: 40, maxY: 720 } : 
+    { minX: 40, maxX: 740, minY: 40, maxY: 440 };
   
   while (!valid && attempts < maxAttempts) {
     attempts++;
     
-    // Generate a position on the grid (multiple of 20 for better alignment)
-    pellet.x = Math.floor(Math.random() * 38) * 20 + 30;
-    pellet.y = Math.floor(Math.random() * 23) * 20 + 30;
+    // Generate a position on the grid (multiple of 10 for better granularity)
+    pellet.x = Math.floor(Math.random() * ((bounds.maxX - bounds.minX) / 10)) * 10 + bounds.minX;
+    pellet.y = Math.floor(Math.random() * ((bounds.maxY - bounds.minY) / 10)) * 10 + bounds.minY;
     
     valid = true;
     
-    // Check collision with any wall - keep a minimum distance of 15px from walls
+    // First check if pellet is within canvas bounds
+    if (pellet.x < bounds.minX || pellet.x + pellet.width > bounds.maxX || 
+        pellet.y < bounds.minY || pellet.y + pellet.height > bounds.maxY) {
+      valid = false;
+      continue;
+    }
+    
+    // Check collision with any wall - keep a safe distance from walls
     for (const wall of walls) {
       const expandedWall = {
-        x: wall.x - 15,
-        y: wall.y - 15,
-        width: wall.width + 30,
-        height: wall.height + 30
+        x: wall.x - wallPadding,
+        y: wall.y - wallPadding,
+        width: wall.width + (wallPadding * 2),
+        height: wall.height + (wallPadding * 2)
       };
       
       if (checkCollision(pellet, expandedWall)) {
@@ -296,10 +309,14 @@ function placePelletSafely() {
       }
     }
     
+    // Skip checking distance from entities if we already know this isn't a valid spot
+    if (!valid) continue;
+    
     // Also check it's not too close to ghosts or pacman at start
-    const minDistFromEntities = 100;
+    const minDistFromEntities = 80; // Reduced from 100 to give more possible positions
     if (Math.hypot(pellet.x - pacman.x, pellet.y - pacman.y) < minDistFromEntities) {
       valid = false;
+      continue;
     }
     
     for (const ghost of ghosts) {
@@ -310,26 +327,61 @@ function placePelletSafely() {
     }
   }
   
-  // If we couldn't find a valid position after many attempts, place in known safe spot
+  // If we couldn't find a valid position after many attempts, place in known safe spot for the current layout
   if (!valid) {
-    pellet.x = 400;
-    pellet.y = 100;
-  }
-
-  // Make a final check to ensure the pellet isn't in a corridor that's too narrow
-  const testPacman = {
-    x: pellet.x - 5, // Position pacman near the pellet
-    y: pellet.y - 5,
-    width: 40,
-    height: 40
-  };
-  
-  for (const wall of walls) {
-    if (checkCollision(testPacman, wall)) {
-      // If not a valid spot, place in a known safe area
+    if (isMobile()) {
+      // Safe spot for mobile
+      pellet.x = 250;
+      pellet.y = 150;
+    } else {
+      // Safe spot for desktop
       pellet.x = 400;
       pellet.y = 100;
-      break;
+    }
+    
+    // Verify our fallback position is actually safe
+    let safetyCheck = true;
+    for (const wall of walls) {
+      const expandedWall = {
+        x: wall.x - wallPadding,
+        y: wall.y - wallPadding,
+        width: wall.width + (wallPadding * 2),
+        height: wall.height + (wallPadding * 2)
+      };
+      
+      if (checkCollision(pellet, expandedWall)) {
+        safetyCheck = false;
+        break;
+      }
+    }
+    
+    // If our fallback isn't safe, try a few more locations
+    if (!safetyCheck) {
+      const safeSpots = isMobile() ? 
+        [{x: 150, y: 150}, {x: 350, y: 150}, {x: 250, y: 550}] : 
+        [{x: 100, y: 100}, {x: 700, y: 100}, {x: 400, y: 400}];
+      
+      for (const spot of safeSpots) {
+        pellet.x = spot.x;
+        pellet.y = spot.y;
+        
+        let spotIsSafe = true;
+        for (const wall of walls) {
+          const expandedWall = {
+            x: wall.x - wallPadding,
+            y: wall.y - wallPadding,
+            width: wall.width + (wallPadding * 2),
+            height: wall.height + (wallPadding * 2)
+          };
+          
+          if (checkCollision(pellet, expandedWall)) {
+            spotIsSafe = false;
+            break;
+          }
+        }
+        
+        if (spotIsSafe) break;
+      }
     }
   }
 }
