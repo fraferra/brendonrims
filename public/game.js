@@ -141,37 +141,43 @@ function setupCanvas() {
     canvas.width = 550;
     canvas.height = 780;
     
-    // Adjust scaleCanvas function for portrait orientation
-    scaleCanvas = function() {
-      const scale = Math.min(window.innerWidth / 550, window.innerHeight / 780);
-      canvas.style.transform = 'scale(' + scale + ')';
-      canvas.style.transformOrigin = 'top left';
-      
-      const container = document.getElementById('gameContainer');
-      if (container) {
-        container.style.width = 550 * scale + 'px';
-        container.style.height = 780 * scale + 'px';
-      }
-    }
+    // Mobile-specific styles for better centering
+    document.getElementById('gameContainer').style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
   }
   scaleCanvas();
 }
 
 // Function to dynamically scale the canvas to fit the viewport
 function scaleCanvas() {
-  // Calculate the scale factor so that the canvas (800x600) fits within the viewport.
-  // We use Math.min to ensure both width and height fit.
-  const scale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
-
-  // Apply the CSS transform to scale the canvas
-  canvas.style.transform = 'scale(' + scale + ')';
-  canvas.style.transformOrigin = 'top left';
-  
-  // Optional: Adjust the canvas container's height so that scrolling is avoided
-  const container = document.getElementById('gameContainer');
-  if (container) {
-    container.style.width = 800 * scale + 'px';
-    container.style.height = 600 * scale + 'px';
+  if (isMobile()) {
+    // Mobile-specific scaling
+    const scale = Math.min(window.innerWidth / 550, (window.innerHeight - 100) / 780);
+    canvas.style.transform = 'scale(' + scale + ')';
+    canvas.style.transformOrigin = 'center'; // Center the canvas
+    
+    // Adjust container to center everything
+    const container = document.getElementById('gameContainer');
+    if (container) {
+      container.style.width = '100%';
+      container.style.height = (780 * scale) + 'px';
+      container.style.display = 'flex';
+      container.style.justifyContent = 'center';
+      container.style.alignItems = 'center';
+      container.style.flexDirection = 'column';
+    }
+  } else {
+    // Desktop scaling (unchanged)
+    const scale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
+    canvas.style.transform = 'scale(' + scale + ')';
+    canvas.style.transformOrigin = 'top left';
+    
+    const container = document.getElementById('gameContainer');
+    if (container) {
+      container.style.width = 800 * scale + 'px';
+      container.style.height = 600 * scale + 'px';
+    }
   }
 }
 

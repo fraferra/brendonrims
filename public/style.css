@@ -134,6 +134,11 @@ p {
   position: relative;
   z-index: 1;
   padding-bottom: 120px; /* Add padding at the bottom to make space for controls */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 6) Game Canvas Styling */
@@ -196,20 +201,49 @@ p {
 
 /* Mobile-specific adjustments */
 @media (max-width: 768px) {
+  .arcade-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 0;
+    overflow: hidden; /* Prevent scrolling */
+  }
+  
+  .game-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+  }
+  
   #gameCanvas {
     max-width: 95%; /* Make sure canvas doesn't overflow horizontally */
-    margin-bottom: 20px; /* Add space below canvas */
+    max-height: 70vh; /* Reduce height to make room for controls */
+    margin: 0 auto;
+    position: relative;
+    top: 0;
+    left: 0;
+    transform-origin: center !important; /* Override the transform origin to center it */
   }
   
   .control-panel {
-    bottom: 20px; /* Position controls at the bottom of the screen */
-    background-color: rgba(0,0,0,0.6); /* Semi-transparent background */
+    position: fixed;
+    bottom: 5vh; /* Position based on viewport height */
+    width: 90%;
+    background-color: rgba(0,0,0,0.6);
     padding: 10px 0;
     border-radius: 20px;
-    width: 90%;
     margin: 0 auto;
     left: 5%;
     right: 5%;
+    z-index: 200;
   }
 }
 
@@ -235,4 +269,104 @@ p {
 #startGame {
   display: block;
   margin: 1rem auto 0; /* top margin, auto left/right, no bottom margin */
+}
+
+/* Game Popup Styling */
+.game-popup {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background-color: #000;
+  border: 4px solid #0033CC;
+  border-radius: 10px;
+  padding: 20px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
+  text-align: center;
+}
+
+.popup-content h2 {
+  color: #FFFF00;
+  font-size: 24px;
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px #FFFF00;
+}
+
+.popup-content p {
+  color: #0ff;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.message-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.message-form label {
+  color: #0ff;
+  margin-bottom: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.message-form textarea {
+  width: 100%;
+  height: 80px;
+  background-color: rgba(0, 255, 255, 0.1);
+  border: 2px solid #0ff;
+  border-radius: 5px;
+  color: #fff;
+  padding: 10px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  margin-bottom: 20px;
+  resize: none;
+}
+
+.game-popup .arcade-button {
+  margin-top: 15px;
+}
+
+/* Hide popups by default */
+#winPopup, #gameOverPopup {
+  display: none;
+}
+
+/* Mobile adjustments for popups */
+@media (max-width: 768px) {
+  .popup-content {
+    padding: 15px;
+    width: 85%;
+  }
+  
+  .popup-content h2 {
+    font-size: 18px;
+  }
+  
+  .popup-content p {
+    font-size: 12px;
+  }
+  
+  .message-form label {
+    font-size: 11px;
+  }
+  
+  .message-form textarea {
+    height: 60px;
+    font-size: 10px;
+  }
 }
