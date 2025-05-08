@@ -279,14 +279,14 @@ const ghosts = [
     y: 240, 
     width: 28,
     height: 28,
-    speed: 0.15,
+    speed: 0.20,
   },
   {
     x: 440, // Inside ghost house
     y: 240,
     width: 28,
     height: 28,
-    speed: 0.15,
+    speed: 0.20,
   }
 ];
 
