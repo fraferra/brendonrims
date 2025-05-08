@@ -225,7 +225,7 @@ p {
   
   #gameCanvas {
     max-width: 100%; /* Make sure canvas doesn't overflow horizontally */
-    max-height: 70vh; /* Reduce height to make room for controls */
+    max-height: 85vh; /* Increased from 70vh to take more vertical space */
     margin: 0 auto;
     position: relative;
     top: 0;
