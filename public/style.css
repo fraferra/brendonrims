@@ -226,15 +226,16 @@ p {
   
   #gameCanvas {
     max-width: 100%; /* Use full width */
-    width: 100vw; /* Force full viewport width */
+    width: 100%; /* Change from 100vw to 100% */
     height: calc(100vh - 100px); /* Full height minus space for controls */
-    max-height: unset; /* Remove max-height limitation */
+    max-height: none; /* Remove max-height limitation */
     margin: 0;
     padding: 0;
-    position: absolute;
+    position: relative; /* Change from absolute to relative */
     top: 0;
     left: 0;
     border-width: 0; /* Remove border to maximize usable space */
+    box-shadow: none; /* Remove shadow for cleaner mobile look */
   }
   
   .control-panel {

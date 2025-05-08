@@ -135,13 +135,24 @@ const desktopWalls = [
 // Determine which wall layout to use
 let walls = isMobile() ? mobileWalls : desktopWalls;
 
+// Add this variable at the top with other global variables
+let mobileBounds = {
+  minX: 20,
+  maxX: 510,
+  minY: 20,
+  maxY: 740
+};
+
 // Canvas size adjustment for mobile
 function setupCanvas() {
   if (isMobile()) {
+    // Set canvas dimensions to fit the viewport
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - 100; // Leave room for controls
+    canvas.height = window.innerHeight - 100;
     
-    // Mobile-specific styles for better centering
+    // Mobile-specific styles
+    canvas.style.border = 'none';
+    
     document.getElementById('gameContainer').style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
@@ -152,22 +163,34 @@ function setupCanvas() {
 // Function to dynamically scale the canvas to fit the viewport
 function scaleCanvas() {
   if (isMobile()) {
-    // Mobile-specific scaling - adjust to fill the screen 
+    // Mobile-specific scaling
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight - 100; // Leave space for controls
     
-    // No need for scaling transformation as we're setting exact dimensions
+    // Reset transform - no scaling needed as we're setting absolute dimensions
     canvas.style.transform = 'none';
     
-    // Adjust the walls array for the new canvas dimensions
-    walls = mobileWalls.map(wall => ({...wall}));
+    // Scale mobile walls to match new canvas size
+    const scaleX = window.innerWidth / 550;
+    const scaleY = (window.innerHeight - 100) / 780;
     
-    // Adjust container to take full viewport
-    const container = document.getElementById('gameContainer');
-    if (container) {
-      container.style.width = '100%';
-      container.style.height = '100%';
-    }
+    // Create a scaled version of the mobile walls
+    walls = mobileWalls.map(wall => {
+      return {
+        x: wall.x * scaleX,
+        y: wall.y * scaleY,
+        width: wall.width * scaleX,
+        height: wall.height * scaleY
+      };
+    });
+    
+    // Adjust boundaries for collision detection
+    mobileBounds = {
+      minX: 20 * scaleX,
+      maxX: (530 - pacman.width) * scaleX,
+      minY: 20 * scaleY,
+      maxY: (760 - pacman.height) * scaleY
+    };
   } else {
     // Desktop scaling (unchanged)
     const scale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
@@ -420,8 +443,8 @@ function movePacman(direction) {
 
   // Update the boundary check based on device type
   if (isMobile()) {
-    if (pacman.x < 20 || pacman.x + pacman.width > 530 || 
-        pacman.y < 20 || pacman.y + pacman.height > 760) {
+    if (pacman.x < mobileBounds.minX || pacman.x + pacman.width > mobileBounds.maxX || 
+        pacman.y < mobileBounds.minY || pacman.y + pacman.height > mobileBounds.maxY) {
       collision = true;
     }
   } else {
