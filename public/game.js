@@ -219,33 +219,54 @@ function scaleCanvas() {
       controlPanel.style.zIndex = '1000';
     }
   } else {
-    // Desktop scaling - also increase by 15% for consistency
-    const baseScale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
-    const scale = baseScale * 1.15;
+    // Desktop scaling - set canvas to fixed size and center it
+    canvas.width = 800;
+    canvas.height = 520;
     
-    canvas.style.position = 'absolute';
-    canvas.style.left = '50%';
-    canvas.style.top = '50%';
-    canvas.style.marginLeft = '-' + (800 / 2) + 'px';
-    canvas.style.marginTop = '-' + (600 / 2) + 'px';
-    canvas.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+    // Reset any previous transformations and positioning
+    canvas.style.transform = '';
+    canvas.style.position = 'relative';
+    canvas.style.left = 'auto';
+    canvas.style.top = 'auto';
+    canvas.style.margin = '0 auto';
+    canvas.style.display = 'block';
+    
+    // Calculate scale that preserves aspect ratio and fits the viewport
+    const scaleX = window.innerWidth / (canvas.width * 1.1); // Add 10% margin
+    const scaleY = window.innerHeight / (canvas.height * 1.2); // Add 20% margin
+    const scale = Math.min(scaleX, scaleY, 1); // Never scale up, only down if needed
+    
+    if (scale < 1) {
+      canvas.style.transform = 'scale(' + scale + ')';
+    }
+    
     canvas.style.transformOrigin = 'center center';
     
+    // Style the container to center the canvas
     const container = document.getElementById('gameContainer');
     if (container) {
       container.style.width = '100%';
       container.style.height = '100vh';
       container.style.display = 'flex';
+      container.style.flexDirection = 'column';
       container.style.justifyContent = 'center';
       container.style.alignItems = 'center';
       container.style.position = 'relative';
+      container.style.overflow = 'hidden';
     }
   }
 }
 
 // Call scaleCanvas on page load and whenever the window is resized
 window.addEventListener('resize', scaleCanvas);
-scaleCanvas();
+window.addEventListener('load', () => {
+  // Set canvas sizes based on layout
+  if (!isMobile()) {
+    canvas.width = 800;
+    canvas.height = 520;
+  }
+  scaleCanvas();
+});
 
 // Game variables
 let score = 0;
@@ -279,14 +300,14 @@ const ghosts = [
     y: 240, 
     width: 28,
     height: 28,
-    speed: 0.20,
+    speed: 0.25,
   },
   {
     x: 440, // Inside ghost house
     y: 240,
     width: 28,
     height: 28,
-    speed: 0.20,
+    speed: 0.25,
   }
 ];
 

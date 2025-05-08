@@ -141,14 +141,13 @@ p {
   justify-content: center;
 }
 
-/* 6) Game Canvas Styling */
+/* 6) Game Canvas Styling - Base styles for all devices */
 #gameCanvas {
   display: block;
   margin: 0 auto;
   background: #000;
   border: 2px solid #222;
   box-shadow: 0 0 16px #0ff;
-  max-height: 75vh; /* Limit height on mobile */
 }
 
 /* 7) Arcade‑Style Buttons */
@@ -239,7 +238,7 @@ p {
     height: auto; /* Let height adjust naturally */
     margin: 0 auto; /* Center horizontally */
     position: relative;
-    border-width: 1px;
+    border-width: 1px; /* Thinner border to save space */
     transform-origin: center center !important; /* Center transform origin */
   }
   
@@ -259,15 +258,49 @@ p {
 
 /* Desktop layout: controls flow inline */
 @media (min-width: 769px) {
+  html, body {
+    overflow: hidden;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .arcade-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .game-container {
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  #gameCanvas {
+    width: 800px; /* Set exact width for desktop */
+    height: 520px; /* Set exact height for desktop */
+    max-height: 75vh; /* Still constrain by viewport height */
+    max-width: 90vw; /* Still constrain by viewport width */
+    object-fit: contain; /* Maintain aspect ratio */
+    margin: 0 auto;
+    position: relative;
+    transform-origin: center;
+    border-width: 2px;
+  }
+  
   .control-panel {
     position: static;
     bottom: auto;
     margin-top: 1rem;
     background-color: transparent;
-  }
-  
-  .game-container {
-    padding-bottom: 40px; /* Less padding needed on desktop */
   }
   
   .control-btn {
