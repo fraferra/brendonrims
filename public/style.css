@@ -205,7 +205,7 @@ p {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     min-height: 100vh;
     width: 100%;
     padding: 0;
@@ -213,36 +213,43 @@ p {
   }
   
   .game-container {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 0;
+    margin: 0;
     overflow: hidden;
   }
   
   #gameCanvas {
-    max-width: 95%; /* Make sure canvas doesn't overflow horizontally */
-    max-height: 70vh; /* Reduce height to make room for controls */
-    margin: 0 auto;
-    position: relative;
+    max-width: 100%; /* Use full width */
+    width: 100vw; /* Force full viewport width */
+    height: calc(100vh - 100px); /* Full height minus space for controls */
+    max-height: unset; /* Remove max-height limitation */
+    margin: 0;
+    padding: 0;
+    position: absolute;
     top: 0;
     left: 0;
-    transform-origin: center !important; /* Override the transform origin to center it */
+    border-width: 0; /* Remove border to maximize usable space */
   }
   
   .control-panel {
     position: fixed;
-    bottom: 5vh; /* Position based on viewport height */
-    width: 90%;
-    background-color: rgba(0,0,0,0.6);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0,0,0,0.8);
     padding: 10px 0;
-    border-radius: 20px;
-    margin: 0 auto;
-    left: 5%;
-    right: 5%;
+    margin: 0;
     z-index: 200;
   }
 }

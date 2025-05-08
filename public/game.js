@@ -138,8 +138,8 @@ let walls = isMobile() ? mobileWalls : desktopWalls;
 // Canvas size adjustment for mobile
 function setupCanvas() {
   if (isMobile()) {
-    canvas.width = 550;
-    canvas.height = 780;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight - 100; // Leave room for controls
     
     // Mobile-specific styles for better centering
     document.getElementById('gameContainer').style.overflow = 'hidden';
@@ -152,20 +152,21 @@ function setupCanvas() {
 // Function to dynamically scale the canvas to fit the viewport
 function scaleCanvas() {
   if (isMobile()) {
-    // Mobile-specific scaling
-    const scale = Math.min(window.innerWidth / 550, (window.innerHeight - 100) / 780);
-    canvas.style.transform = 'scale(' + scale + ')';
-    canvas.style.transformOrigin = 'center'; // Center the canvas
+    // Mobile-specific scaling - adjust to fill the screen 
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight - 100; // Leave space for controls
     
-    // Adjust container to center everything
+    // No need for scaling transformation as we're setting exact dimensions
+    canvas.style.transform = 'none';
+    
+    // Adjust the walls array for the new canvas dimensions
+    walls = mobileWalls.map(wall => ({...wall}));
+    
+    // Adjust container to take full viewport
     const container = document.getElementById('gameContainer');
     if (container) {
       container.style.width = '100%';
-      container.style.height = (780 * scale) + 'px';
-      container.style.display = 'flex';
-      container.style.justifyContent = 'center';
-      container.style.alignItems = 'center';
-      container.style.flexDirection = 'column';
+      container.style.height = '100%';
     }
   } else {
     // Desktop scaling (unchanged)
