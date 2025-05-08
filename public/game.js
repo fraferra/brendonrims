@@ -328,9 +328,9 @@ while (!valid && attempts < maxAttempts) {
 // If we couldn't find a valid position after many attempts, place in known safe spot for the current layout
 if (!valid) {
   if (isMobile()) {
-    // Safe spot for mobile
-    pellet.x = 250;
-    pellet.y = 150;
+    // Safe spot for mobile - verified safe location
+    pellet.x = 270;
+    pellet.y = 170; // Adjusted to avoid collision with new wall layout
   } else {
     // Safe spot for desktop
     pellet.x = 400;
@@ -356,7 +356,7 @@ if (!valid) {
   // If our fallback isn't safe, try a few more locations
   if (!safetyCheck) {
     const safeSpots = isMobile() ? 
-      [{x: 150, y: 150}, {x: 350, y: 150}, {x: 250, y: 550}] : 
+      [{x: 150, y: 200}, {x: 350, y: 200}, {x: 250, y: 500}] : 
       [{x: 100, y: 100}, {x: 700, y: 100}, {x: 400, y: 400}];
     
     for (const spot of safeSpots) {
@@ -679,15 +679,15 @@ function startGame() {
 score = 0;
 
 if (isMobile()) {
-  // Mobile starting positions
-  pacman.x = 50; 
-  pacman.y = 700;
+  // Mobile starting positions - adjusted to avoid wall collisions
+  pacman.x = 80; // Moved right to avoid left wall
+  pacman.y = 650; // Moved up to avoid bottom walls
   
-  // Reset ghosts for mobile layout
-  ghosts[0].x = 210;
-  ghosts[0].y = 380;
-  ghosts[1].x = 260;
-  ghosts[1].y = 380;
+  // Reset ghosts for mobile layout - positioned safely in ghost house area
+  ghosts[0].x = 220; // Adjusted to be between ghost house walls
+  ghosts[0].y = 410; // Positioned below the top wall of ghost house
+  ghosts[1].x = 270; // Adjusted to be between ghost house walls
+  ghosts[1].y = 410; // Positioned below the top wall of ghost house
 } else {
   // Desktop starting positions (unchanged)
   pacman.x = 50;
