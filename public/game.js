@@ -153,7 +153,7 @@ if (isMobile()) {
   // Mobile-specific scaling
   const scale = Math.min(window.innerWidth / 550, (window.innerHeight - 100) / 780);
   canvas.style.transform = 'scale(' + scale + ')';
-  canvas.style.transformOrigin = 'center'; // Center the canvas
+  canvas.style.transformOrigin = 'center top'; // Changed from 'center' to 'center top'
   
   // Adjust container to center everything
   const container = document.getElementById('gameContainer');
@@ -162,8 +162,10 @@ if (isMobile()) {
     container.style.height = (780 * scale) + 'px';
     container.style.display = 'flex';
     container.style.justifyContent = 'center';
-    container.style.alignItems = 'center';
+    container.style.alignItems = 'flex-start'; // Changed from 'center' to 'flex-start'
     container.style.flexDirection = 'column';
+    container.style.paddingTop = '20px'; // Added padding at the top
+    container.style.paddingBottom = '15vh'; // Added more space at bottom for controls
   }
 } else {
   // Desktop scaling (unchanged)
