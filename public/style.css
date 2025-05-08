@@ -201,6 +201,16 @@ p {
 
 /* Mobile-specific adjustments */
 @media (max-width: 800px) {
+  /* Prevent scrolling on all levels */
+  html, body {
+    overflow: hidden;
+    height: 100%;
+    position: fixed;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
   .arcade-container {
     display: flex;
     flex-direction: column;
@@ -219,22 +229,23 @@ p {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Change to flex-start to have more control over positioning */
+    justify-content: center; /* Center content vertically */
     overflow: hidden;
   }
   
   #gameCanvas {
     max-width: 100%; /* Make sure canvas doesn't overflow horizontally */
-    height: 70vh; /* Fixed height instead of max-height for better control */
-    margin: 0;
+    max-height: 80vh; /* Reduce max height to ensure it fits on screen */
+    height: auto; /* Let height adjust naturally */
+    margin: 0 auto; /* Center horizontally */
     position: relative;
-    border-width: 1px; /* Thinner border to save space */
-    transform-origin: top center !important;
+    border-width: 1px;
+    transform-origin: center center !important; /* Center transform origin */
   }
   
   .control-panel {
     position: fixed;
-    bottom: 5vh; /* Position based on viewport height */
+    bottom: 2vh; /* Position closer to bottom */
     width: 90%;
     background-color: rgba(0,0,0,0.6);
     padding: 10px 0;
