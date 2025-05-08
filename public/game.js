@@ -59,9 +59,9 @@ const mobileWalls = [
   { x: 160, y: 360, width: 60,  height: 20 },  // Top left
   { x: 260, y: 360, width: 60,  height: 20 },  // Top right
   { x: 160, y: 360, width: 20,  height: 20 },  // Left top
-  { x: 160, y: 410, width: 20,  height: 20 },  // Left bottom
+  // { x: 160, y: 410, width: 20,  height: 10 },  // Left bottom
   { x: 300, y: 360, width: 20,  height: 20 },  // Right top
-  { x: 300, y: 410, width: 20,  height: 20 },  // Right bottom
+  // { x: 300, y: 410, width: 20,  height: 10 },  // Right bottom
   { x: 160, y: 430, width: 160, height: 20 },  // Bottom
   
   // Lower section
@@ -713,38 +713,49 @@ function startGame() {
  */
 function endGame() {
   gameRunning = false;
-  alert('Congratulations you little rimmer, you rimmed good!');
+  // Show the win popup instead of using alert
+  const winPopup = document.getElementById('winPopup');
+  winPopup.style.display = 'flex';
 
-  // Prompt the user for a custom message
-  const customMessage = prompt('Enter a custom message to send to Brendon and Emma!', 'Rim rim Brendon! It\'s wedding timeeee!');
-  const username = document.getElementById('usernameInput').value.trim();
-
-  // Send a request to our backend to send the Twilio SMS
-  fetch('/win', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      message: customMessage,
-      username: username // Include username in the request
+  // Send message via Twilio when "SEND MESSAGE" is clicked
+  document.getElementById('sendMessageBtn').addEventListener('click', function() {
+    const customMessage = document.getElementById('customMessage').value.trim() || 'Rim rim Brendon! It\'s wedding timeeee!';
+    const username = document.getElementById('usernameInput').value.trim();
+    fetch('/win', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: customMessage,
+        username: username
+      })
     })
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok.');
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('SMS sent successfully:', data);
-    })
-    .catch(err => {
-      console.error('Error sending SMS:', err);
-    });
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok.');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('SMS sent successfully:', data);
+        document.getElementById('winPopup').style.display = 'none';
+      })
+      .catch(err => {
+        console.error('Error sending SMS:', err);
+      });
+  });
 }
 
 function gameOver() {
   gameRunning = false;
-  alert('Game Over! An EMMA caught you.');
+  // Show the game over popup
+  const gameOverPopup = document.getElementById('gameOverPopup');
+  gameOverPopup.style.display = 'flex';
+
+  // Allow user to restart
+  document.getElementById('tryAgainBtn').addEventListener('click', function() {
+    gameOverPopup.style.display = 'none';
+    startGame();
+  });
 }
 
 /********************

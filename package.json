@@ -13,6 +13,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "twilio": "^4.16.0",
-    "gifler": "0.1.0"
+    "gifler": "0.1.0",
+    "node-fetch": "^2.6.7"
   }
 }
