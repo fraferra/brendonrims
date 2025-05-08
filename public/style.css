@@ -86,11 +86,54 @@ p {
   margin-bottom: 1rem;
 }
 
+.prompt-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  max-width: 400px;
+}
+
+/* Mobile adjustments for username prompt */
+@media (max-width: 768px) {
+  .username-prompt h1 {
+    font-size: 1.2rem;
+    margin-top: 0;
+    padding: 0 10px;
+  }
+  
+  .username-prompt p {
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  .sprite-container {
+    margin: 1rem 0;
+  }
+  
+  .sprite {
+    width: 150px;
+  }
+  
+  .username-prompt label {
+    text-align: center;
+    width: 100%;
+    font-size: 0.9rem;
+  }
+  
+  .username-prompt input {
+    width: 80%;
+    margin: 0 auto 1rem auto;
+    text-align: center;
+  }
+}
+
 /* Hide game until after name entry */
 .game-container {
   display: none;
   position: relative;
   z-index: 1;
+  padding-bottom: 120px; /* Add padding at the bottom to make space for controls */
 }
 
 /* 6) Game Canvas Styling */
@@ -100,6 +143,7 @@ p {
   background: #000;
   border: 8px solid #222;
   box-shadow: 0 0 16px #0ff;
+  max-height: 75vh; /* Limit height on mobile */
 }
 
 /* 7) Arcade‑Style Buttons */
@@ -128,16 +172,45 @@ p {
 
 /* 8) Pinned Control Panel on Mobile */
 .control-panel {
-  position: absolute;
-  left: 0; right: 0;
-  bottom: 20px;
+  position: fixed; /* Changed from absolute to fixed */
+  left: 0; 
+  right: 0;
+  bottom: 30px; /* Increased from 20px to move controls lower */
   display: flex;
   justify-content: center;
   gap: 16px;
   pointer-events: none;
+  z-index: 100; /* Ensure controls are above other elements */
 }
+
 .control-btn {
   pointer-events: all;
+  padding: 10px; /* Smaller padding */
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  #gameCanvas {
+    max-width: 95%; /* Make sure canvas doesn't overflow horizontally */
+    margin-bottom: 20px; /* Add space below canvas */
+  }
+  
+  .control-panel {
+    bottom: 20px; /* Position controls at the bottom of the screen */
+    background-color: rgba(0,0,0,0.6); /* Semi-transparent background */
+    padding: 10px 0;
+    border-radius: 20px;
+    width: 90%;
+    margin: 0 auto;
+    left: 5%;
+    right: 5%;
+  }
 }
 
 /* Desktop layout: controls flow inline */
@@ -146,6 +219,16 @@ p {
     position: static;
     bottom: auto;
     margin-top: 1rem;
+    background-color: transparent;
+  }
+  
+  .game-container {
+    padding-bottom: 40px; /* Less padding needed on desktop */
+  }
+  
+  .control-btn {
+    width: 60px;
+    height: 60px;
   }
 }
 

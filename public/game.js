@@ -17,64 +17,68 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // (Other event listeners for mobile controls, etc.)
+    setupCanvas();
   });
   
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Function to dynamically scale the canvas to fit the viewport
-function scaleCanvas() {
-  // Calculate the scale factor so that the canvas (800x600) fits within the viewport.
-  // We use Math.min to ensure both width and height fit.
-  const scale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
-
-  // Apply the CSS transform to scale the canvas
-  canvas.style.transform = 'scale(' + scale + ')';
-  canvas.style.transformOrigin = 'top left';
-  
-  // Optional: Adjust the canvas container's height so that scrolling is avoided
-  const container = document.getElementById('gameContainer');
-  if (container) {
-    container.style.width = 800 * scale + 'px';
-    container.style.height = 600 * scale + 'px';
-  }
+// Function to detect mobile devices
+function isMobile() {
+  return window.innerWidth <= 768 || 
+         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
-// Call scaleCanvas on page load and whenever the window is resized
-window.addEventListener('resize', scaleCanvas);
-scaleCanvas();
+// Mobile-oriented maze layout - taller than it is wide
+const mobileWalls = [
+  // Outer border
+  { x: 0,   y: 0,   width: 550, height: 20 },  // Top
+  { x: 0,   y: 760, width: 550, height: 20 },  // Bottom 
+  { x: 0,   y: 0,   width: 20,  height: 780 }, // Left
+  { x: 530, y: 0,   width: 20,  height: 780 }, // Right
+  
+  // Top section
+  { x: 60,  y: 60,  width: 100, height: 20 },
+  { x: 200, y: 60,  width: 250, height: 20 },
+  { x: 60,  y: 120, width: 60,  height: 20 },
+  { x: 160, y: 120, width: 290, height: 20 },
+  
+  // Vertical dividers
+  { x: 160, y: 60,  width: 20,  height: 60 },
+  { x: 330, y: 140, width: 20,  height: 180 },
+  { x: 120, y: 180, width: 20,  height: 180 },
+  { x: 240, y: 260, width: 20,  height: 160 },
+  
+  // Middle section with passages
+  { x: 60,  y: 180, width: 60,  height: 20 },
+  { x: 140, y: 180, width: 250, height: 20 },
+  { x: 60,  y: 260, width: 170, height: 20 },
+  { x: 260, y: 260, width: 210, height: 20 },
+  
+  // Ghost house - with openings on both sides
+  { x: 160, y: 360, width: 60,  height: 20 },  // Top left
+  { x: 260, y: 360, width: 60,  height: 20 },  // Top right
+  { x: 160, y: 360, width: 20,  height: 20 },  // Left top
+  { x: 160, y: 410, width: 20,  height: 20 },  // Left bottom
+  { x: 300, y: 360, width: 20,  height: 20 },  // Right top
+  { x: 300, y: 410, width: 20,  height: 20 },  // Right bottom
+  { x: 160, y: 430, width: 160, height: 20 },  // Bottom
+  
+  // Lower section
+  { x: 60,  y: 500, width: 160, height: 20 },
+  { x: 260, y: 500, width: 210, height: 20 },
+  { x: 120, y: 500, width: 20,  height: 100 },
+  { x: 380, y: 500, width: 20,  height: 100 },
+  { x: 60,  y: 600, width: 200, height: 20 },
+  { x: 300, y: 600, width: 170, height: 20 },
+  
+  // Bottom section with wider corridors
+  { x: 60,  y: 680, width: 140, height: 20 },
+  { x: 240, y: 680, width: 230, height: 20 },
+];
 
-// Game variables
-let score = 0;
-const winScore = 3;  // Increase if you want a longer game
-let gameRunning = false;
-
-// Pac-Man object - adjusted to be slightly smaller than corridor width
-const pacman = {
-  x: 40,
-  y: 40,
-  width: 30,  // Reduced from 40 to ensure it fits in corridors
-  height: 30, // Reduced from 40 to ensure it fits in corridors
-  speed: 10,
-  radius: 10,
-};
-
-// Pellet object
-const pellet = {
-  x: 0,
-  y: 0,
-  width: 30,
-  height: 30,
-  // make it circular
-  radius: 10,
-};
-
-
-/*
-  Walls array: Rebuilt to ensure all corridors are at least 40px wide
-  for comfortable navigation of both Pac-Man and ghosts
-*/
-const walls = [
+// Desktop-oriented maze layout (our existing walls array)
+const desktopWalls = [
   // Outer border - Modified to create more space
   { x: 0,   y: 0,   width: 800, height: 20  }, // Top
   { x: 0,   y: 500, width: 800, height: 20  }, // Bottom - moved down to 500 (was 480)
@@ -127,6 +131,78 @@ const walls = [
   { x: 420, y: 410, width: 100, height: 20 },  // Y moved up from 440
   { x: 620, y: 410, width: 120, height: 20 },  // Y moved up from 440
 ];
+
+// Determine which wall layout to use
+let walls = isMobile() ? mobileWalls : desktopWalls;
+
+// Canvas size adjustment for mobile
+function setupCanvas() {
+  if (isMobile()) {
+    canvas.width = 550;
+    canvas.height = 780;
+    
+    // Adjust scaleCanvas function for portrait orientation
+    scaleCanvas = function() {
+      const scale = Math.min(window.innerWidth / 550, window.innerHeight / 780);
+      canvas.style.transform = 'scale(' + scale + ')';
+      canvas.style.transformOrigin = 'top left';
+      
+      const container = document.getElementById('gameContainer');
+      if (container) {
+        container.style.width = 550 * scale + 'px';
+        container.style.height = 780 * scale + 'px';
+      }
+    }
+  }
+  scaleCanvas();
+}
+
+// Function to dynamically scale the canvas to fit the viewport
+function scaleCanvas() {
+  // Calculate the scale factor so that the canvas (800x600) fits within the viewport.
+  // We use Math.min to ensure both width and height fit.
+  const scale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
+
+  // Apply the CSS transform to scale the canvas
+  canvas.style.transform = 'scale(' + scale + ')';
+  canvas.style.transformOrigin = 'top left';
+  
+  // Optional: Adjust the canvas container's height so that scrolling is avoided
+  const container = document.getElementById('gameContainer');
+  if (container) {
+    container.style.width = 800 * scale + 'px';
+    container.style.height = 600 * scale + 'px';
+  }
+}
+
+// Call scaleCanvas on page load and whenever the window is resized
+window.addEventListener('resize', scaleCanvas);
+scaleCanvas();
+
+// Game variables
+let score = 0;
+const winScore = 3;  // Increase if you want a longer game
+let gameRunning = false;
+
+// Pac-Man object - adjusted to be slightly smaller than corridor width
+const pacman = {
+  x: 40,
+  y: 40,
+  width: 30,  // Reduced from 40 to ensure it fits in corridors
+  height: 30, // Reduced from 40 to ensure it fits in corridors
+  speed: 10,
+  radius: 10,
+};
+
+// Pellet object
+const pellet = {
+  x: 0,
+  y: 0,
+  width: 30,
+  height: 30,
+  // make it circular
+  radius: 10,
+};
 
 // Ghosts: placed in the ghost house, not inside walls
 const ghosts = [
@@ -283,10 +359,17 @@ function movePacman(direction) {
     }
   }
 
-  // Check if we're out of bounds
-  if (pacman.x < 20 || pacman.x + pacman.width > 780 || 
-      pacman.y < 20 || pacman.y + pacman.height > 480) {
-    collision = true;
+  // Update the boundary check based on device type
+  if (isMobile()) {
+    if (pacman.x < 20 || pacman.x + pacman.width > 530 || 
+        pacman.y < 20 || pacman.y + pacman.height > 760) {
+      collision = true;
+    }
+  } else {
+    if (pacman.x < 20 || pacman.x + pacman.width > 780 || 
+        pacman.y < 20 || pacman.y + pacman.height > 480) {
+      collision = true;
+    }
   }
 
   // If collision occurred, revert to previous position
@@ -539,19 +622,29 @@ function gameLoop() {
 function startGame() {
   score = 0;
   
-  // Updated starting position
-  pacman.x = 50; 
-  pacman.y = 450;
+  if (isMobile()) {
+    // Mobile starting positions
+    pacman.x = 50; 
+    pacman.y = 700;
+    
+    // Reset ghosts for mobile layout
+    ghosts[0].x = 210;
+    ghosts[0].y = 380;
+    ghosts[1].x = 260;
+    ghosts[1].y = 380;
+  } else {
+    // Desktop starting positions (unchanged)
+    pacman.x = 50;
+    pacman.y = 450;
+    
+    // Reset ghosts for desktop layout
+    ghosts[0].x = 360;
+    ghosts[0].y = 260;
+    ghosts[1].x = 380;
+    ghosts[1].y = 260;
+  }
 
-  // Place pellet in a safe location
   placePelletSafely();
-
-  // Reset ghosts - positioned to better utilize multiple exits
-  ghosts[0].x = 360; // First ghost - can exit right
-  ghosts[0].y = 260;
-  ghosts[1].x = 380; // Second ghost - positioned to exit left
-  ghosts[1].y = 260;
-
   gameRunning = true;
   gameLoop();
 }
@@ -562,7 +655,7 @@ function startGame() {
  */
 function endGame() {
   gameRunning = false;
-  alert('Congratulations, you won!');
+  alert('Congratulations you little rimmer, you rimmed good!');
 
   // Prompt the user for a custom message
   const customMessage = prompt('Enter a custom message to send to Brendon and Emma!', 'Rim rim Brendon! It\'s wedding timeeee!');
