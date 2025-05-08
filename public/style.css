@@ -146,7 +146,7 @@ p {
   display: block;
   margin: 0 auto;
   background: #000;
-  border: 8px solid #222;
+  border: 2px solid #222;
   box-shadow: 0 0 16px #0ff;
   max-height: 75vh; /* Limit height on mobile */
 }
