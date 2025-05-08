@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+console.log("Canvas initialized", canvas.width, canvas.height);
 
 // Function to detect mobile devices
 function isMobile() {
@@ -146,13 +147,27 @@ let mobileBounds = {
 // Canvas size adjustment for mobile
 function setupCanvas() {
   if (isMobile()) {
-    // Set canvas dimensions to fit the viewport
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - 100;
+    // Get the viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
     
-    // Mobile-specific styles
+    // Set canvas to exact viewport size minus control area
+    canvas.width = viewportWidth;
+    canvas.height = viewportHeight - 100;
+    
+    console.log("Mobile canvas setup:", canvas.width, canvas.height);
+    
+    // Remove any transformations and borders
+    canvas.style.transform = 'none';
     canvas.style.border = 'none';
+    canvas.style.boxShadow = 'none';
+    canvas.style.margin = '0';
+    canvas.style.padding = '0';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
     
+    // Prevent any scrolling
     document.getElementById('gameContainer').style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
@@ -163,34 +178,56 @@ function setupCanvas() {
 // Function to dynamically scale the canvas to fit the viewport
 function scaleCanvas() {
   if (isMobile()) {
-    // Mobile-specific scaling
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight - 100; // Leave space for controls
-    
-    // Reset transform - no scaling needed as we're setting absolute dimensions
+    // For mobile we use the viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight - 100; // Leave space for controls
+
+    // Force direct mapping (no scaling transformation)
+    canvas.width = viewportWidth;
+    canvas.height = viewportHeight;
     canvas.style.transform = 'none';
     
-    // Scale mobile walls to match new canvas size
-    const scaleX = window.innerWidth / 550;
-    const scaleY = (window.innerHeight - 100) / 780;
+    console.log("Mobile walls scaling with viewport:", viewportWidth, viewportHeight);
     
-    // Create a scaled version of the mobile walls
+    // Create proportionally scaled walls based on viewport size
+    const scaleX = viewportWidth / 550;
+    const scaleY = viewportHeight / 780;
+    
+    // Apply scaling to each wall's coordinates and dimensions
     walls = mobileWalls.map(wall => {
-      return {
+      const scaledWall = {
         x: wall.x * scaleX,
         y: wall.y * scaleY,
         width: wall.width * scaleX,
         height: wall.height * scaleY
       };
+      return scaledWall;
     });
     
-    // Adjust boundaries for collision detection
+    // Log first few walls to check scaling
+    console.log("First few scaled walls:", walls.slice(0, 3));
+    
+    // Update collision boundaries for mobile
     mobileBounds = {
       minX: 20 * scaleX,
       maxX: (530 - pacman.width) * scaleX,
       minY: 20 * scaleY,
       maxY: (760 - pacman.height) * scaleY
     };
+    
+    // Adjust character positions and sizes based on viewport
+    pacman.width = 30 * Math.min(scaleX, scaleY);
+    pacman.height = 30 * Math.min(scaleX, scaleY);
+    
+    // Scale ghosts and pellet too
+    for (const ghost of ghosts) {
+      ghost.width = 30 * Math.min(scaleX, scaleY);
+      ghost.height = 30 * Math.min(scaleX, scaleY);
+    }
+    
+    pellet.width = 30 * Math.min(scaleX, scaleY);
+    pellet.height = 30 * Math.min(scaleX, scaleY);
+    
   } else {
     // Desktop scaling (unchanged)
     const scale = Math.min(window.innerWidth / 800, window.innerHeight / 600);
@@ -729,6 +766,8 @@ function startGame() {
   placePelletSafely();
   gameRunning = true;
   gameLoop();
+  // Add a slight delay to check visibility
+  setTimeout(checkCanvasVisibility, 500);
 }
 
 /**
@@ -923,3 +962,26 @@ document.getElementById('startGame').addEventListener('click', () => {
     alert('Please enter a username.');
   }
 });
+
+// Add this debug function at the end of the file
+function checkCanvasVisibility() {
+  const canvas = document.getElementById('gameCanvas');
+  if (!canvas) {
+    console.error("Canvas element not found!");
+    return;
+  }
+
+  const computedStyle = window.getComputedStyle(canvas);
+  console.log("Canvas display:", computedStyle.display);
+  console.log("Canvas visibility:", computedStyle.visibility);
+  console.log("Canvas dimensions:", canvas.width, "x", canvas.height);
+  console.log("Canvas offset:", canvas.offsetLeft, canvas.offsetTop);
+  
+  // Force a redraw of the canvas
+  ctx.fillStyle = 'red';
+  ctx.fillRect(0, 0, 100, 100);
+  ctx.fillStyle = 'green';
+  ctx.fillRect(100, 100, 100, 100);
+  ctx.fillStyle = 'blue';  
+  ctx.fillRect(200, 200, 100, 100);
+}

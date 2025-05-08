@@ -15,12 +15,18 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <script>
+    // Mobile device detection check - logs to console
+    console.log("Mobile check:", window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    console.log("Viewport dimensions:", window.innerWidth, window.innerHeight);
+  </script>
+  
   <div class="arcade-container">
     <!-- USERNAME PROMPT OVERLAY -->
     <div class="username-prompt" id="usernamePrompt">
           <!-- HEADER -->
     <header>
-      <h1>WELCOME TO THE RIMMER-MAN</h1>
+      <h1>WELCOME TO THE ARCADE</h1>
       <p>Get ready to play!</p>
     </header>
 

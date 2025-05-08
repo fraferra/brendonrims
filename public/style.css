@@ -213,29 +213,31 @@ p {
   }
   
   .game-container {
-    width: 100vw;
+    width: 100%;
     height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
     padding: 0;
     margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: hidden;
+    background-color: #000; /* Force black background */
+    display: block; /* Change from flex to block */
   }
   
   #gameCanvas {
-    max-width: 100%; /* Use full width */
-    width: 100%; /* Change from 100vw to 100% */
-    height: calc(100vh - 100px); /* Full height minus space for controls */
-    max-height: none; /* Remove max-height limitation */
+    display: block;
+    width: 100%;
+    height: calc(100vh - 100px);
     margin: 0;
     padding: 0;
-    position: relative; /* Change from absolute to relative */
+    position: absolute;
     top: 0;
     left: 0;
-    border-width: 0; /* Remove border to maximize usable space */
-    box-shadow: none; /* Remove shadow for cleaner mobile look */
+    border: none;
+    box-shadow: none;
   }
   
   .control-panel {
@@ -248,7 +250,7 @@ p {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0,0,0,0.8);
+    background-color: rgba(0,0,0,0.9);
     padding: 10px 0;
     margin: 0;
     z-index: 200;
