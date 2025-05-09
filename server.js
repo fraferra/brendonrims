@@ -26,39 +26,61 @@ app.use(express.static('public'));
 // Endpoint to send SMS when a player wins
 app.post('/win', async (req, res) => {
     const smsMessage = req.body.message || 'Player just won the game! Congratulations!';
-    console.log('Sending SMS:', smsMessage);
-    console.log('To:', process.env.TARGET_NUMBER);
-    console.log('From:', process.env.TEXTBELT_KEY );
-    // Prepare POST data for Textbelt
-    const params = new URLSearchParams({
-      phone: process.env.TARGET_NUMBER,           // Set in your .env file (e.g., +15551234567)
-      message: smsMessage,
-      key: process.env.TEXTBELT_KEY || 'textbelt'   // Free key is 'textbelt'
-    });
+    const username = req.body.username || 'Anonymous Player';
+    const personalizedMessage = `${username}: ${smsMessage}`;
+
+    console.log('Sending SMS:', personalizedMessage);
+    
+    // Get all target phone numbers
+    const targetNumbers = [
+      process.env.TARGET_NUMBER,
+      process.env.TARGET_NUMBER2,
+      process.env.TARGET_NUMBER3
+    ].filter(Boolean); // Filter out any undefined numbers
+    
+    console.log('To:', targetNumbers);
+    console.log('From:', process.env.TEXTBELT_KEY);
     
     try {
-      const response = await fetch('https://textbelt.com/text', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: params
+      // Send SMS to all numbers in parallel
+      const sendPromises = targetNumbers.map(async (phoneNumber) => {
+        const params = new URLSearchParams({
+          phone: phoneNumber,
+          message: personalizedMessage,
+          key: process.env.TEXTBELT_KEY || 'textbelt'
+        });
+        
+        const response = await fetch('https://textbelt.com/text', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+        });
+        
+        const data = await response.json();
+        return {
+          number: phoneNumber,
+          success: data.success,
+          details: data
+        };
       });
       
-      const data = await response.json();
+      const results = await Promise.all(sendPromises);
       
-      if (data.success) {
-        console.log('SMS sent successfully:', data);
-        res.json({ success: true });
+      // Check if at least one message was sent successfully
+      const anySuccess = results.some(result => result.success);
+      
+      if (anySuccess) {
+        console.log('SMS sent successfully to at least one recipient:', results);
+        res.json({ success: true, results });
       } else {
-        console.error('Error sending SMS:', data);
-        res.status(500).json({ error: data.error });
+        console.error('Error sending all SMS messages:', results);
+        res.status(500).json({ error: 'Failed to send messages', results });
       }
     } catch (error) {
       console.error('Error sending SMS:', error);
       res.status(500).json({ error: error.message });
     }
   });
-  
-
 
 // Start the server
 app.listen(port, () => {
