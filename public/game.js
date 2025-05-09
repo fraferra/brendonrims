@@ -270,8 +270,12 @@ window.addEventListener('load', () => {
 
 // Game variables
 let score = 0;
-const winScore = 3;  // Increase if you want a longer game
+const winScore = 5;  // Already set to 5 pellets to win
 let gameRunning = false;
+let lives = 3; // Player starts with 3 lives
+let ghostsCanShoot = false; // Will be enabled after 2 pellets
+let ghostFireballs = []; // Array to store active fireballs
+let lastPositionReset = 0; // Timestamp of last position reset
 
 // Pac-Man object - adjusted to be slightly smaller than corridor width
 const pacman = {
@@ -300,16 +304,30 @@ const ghosts = [
     y: 240, 
     width: 28,
     height: 28,
-    speed: 0.25,
+    speed: 0.20, // Base speed
+    baseSpeed: 0.20, // Store original speed for resets
+    direction: 'right', // Track direction for shooting
+    lastShotTime: 0, // Track when ghost last shot
   },
   {
     x: 440, // Inside ghost house
     y: 240,
     width: 28,
     height: 28,
-    speed: 0.25,
+    speed: 0.20, // Base speed
+    baseSpeed: 0.20, // Store original speed for resets
+    direction: 'left', // Track direction for shooting
+    lastShotTime: 0, // Track when ghost last shot
   }
 ];
+
+// Load heart/ring image for lives
+const heartImg = new Image();
+heartImg.src = 'assets/heart.png'; // Make sure this image exists in your assets folder
+
+// Fireball image
+const fireballImg = new Image();
+fireballImg.src = 'assets/fireball.png'; // Make sure this image exists in your assets folder
 
 // Retro sprite placeholders (you can replace with actual images)
 const pacmanImg = new Image();
@@ -469,6 +487,36 @@ function placePelletSafely() {
   }
 }
 
+// Function to reset positions of pacman and ghosts
+function resetPositions() {
+  lastPositionReset = Date.now();
+  
+  if (isMobile()) {
+    // Mobile starting positions - adjusted for taller maze
+    pacman.x = 80; 
+    pacman.y = 820; // Lower position for taller maze
+    
+    // Reset ghosts for mobile layout
+    ghosts[0].x = 220; 
+    ghosts[0].y = 440; // Inside ghost house but not on a wall
+    ghosts[1].x = 280; // Fixed position so it's not stuck
+    ghosts[1].y = 440; // Clear of any walls so it can move
+  } else {
+    // Desktop starting positions
+    pacman.x = 50;
+    pacman.y = 450;
+    
+    // Reset ghosts for desktop layout
+    ghosts[0].x = 360;
+    ghosts[0].y = 260;
+    ghosts[1].x = 380;
+    ghosts[1].y = 260;
+  }
+  
+  // Clear fireballs when positions reset
+  ghostFireballs = [];
+}
+
 // Improved collision-handling move function
 function movePacman(direction) {
   const prevX = pacman.x;
@@ -517,6 +565,101 @@ function movePacman(direction) {
   if (collision) {
     pacman.x = prevX;
     pacman.y = prevY;
+  }
+}
+
+// Ghost shooting fireballs
+function ghostShoot(ghost) {
+  // Don't allow shooting if ghost can't shoot yet
+  if (!ghostsCanShoot) return;
+  
+  // Don't allow shooting too frequently (3 second cooldown)
+  const now = Date.now();
+  if (now - ghost.lastShotTime < 3000) return;
+  
+  // Determine direction based on ghost movement
+  const distX = pacman.x - ghost.x;
+  const distY = pacman.y - ghost.y;
+  
+  // Shoot in the direction with the greatest distance to pacman
+  let direction;
+  if (Math.abs(distX) > Math.abs(distY)) {
+    direction = distX > 0 ? 'right' : 'left';
+  } else {
+    direction = distY > 0 ? 'down' : 'up';
+  }
+
+  // Create a new fireball
+  const fireball = {
+    x: ghost.x + ghost.width / 2 - 8, // Center of ghost minus half of fireball width
+    y: ghost.y + ghost.height / 2 - 8, // Center of ghost minus half of fireball height
+    width: 16,
+    height: 16,
+    speed: 4,
+    direction: direction
+  };
+
+  // Add the fireball to the array
+  ghostFireballs.push(fireball);
+  
+  // Update last shot time
+  ghost.lastShotTime = now;
+}
+
+// Update fireballs position and check collisions
+function updateFireballs() {
+  for (let i = ghostFireballs.length - 1; i >= 0; i--) {
+    const fireball = ghostFireballs[i];
+    
+    // Move fireball according to direction
+    switch (fireball.direction) {
+      case 'up':
+        fireball.y -= fireball.speed;
+        break;
+      case 'down':
+        fireball.y += fireball.speed;
+        break;
+      case 'left':
+        fireball.x -= fireball.speed;
+        break;
+      case 'right':
+        fireball.x += fireball.speed;
+        break;
+    }
+    
+    // Check collision with Pacman
+    if (checkCollision(fireball, pacman)) {
+      ghostFireballs.splice(i, 1); // Remove fireball
+      loseLife();
+      continue;
+    }
+    
+    // Check collision with walls
+    let hitWall = false;
+    for (const wall of walls) {
+      if (checkCollision(fireball, wall)) {
+        hitWall = true;
+        break;
+      }
+    }
+    
+    // Also check boundaries
+    if (isMobile()) {
+      if (fireball.x < 10 || fireball.x + fireball.width > 540 || 
+          fireball.y < 10 || fireball.y + fireball.height > 860) {
+        hitWall = true;
+      }
+    } else {
+      if (fireball.x < 20 || fireball.x + fireball.width > 780 || 
+          fireball.y < 20 || fireball.y + fireball.height > 480) {
+        hitWall = true;
+      }
+    }
+    
+    // Remove fireball if it hit a wall
+    if (hitWall) {
+      ghostFireballs.splice(i, 1);
+    }
   }
 }
 
@@ -634,6 +777,26 @@ function updateGhosts() {
         }
       }
     }
+    
+    // Randomly decide to shoot (if enabled)
+    if (ghostsCanShoot && Math.random() < 0.005) { // 0.5% chance per frame
+      ghostShoot(ghost);
+    }
+  }
+}
+
+// Function to handle losing a life
+function loseLife() {
+  // Prevent multiple life losses at once by checking if positions were just reset
+  const now = Date.now();
+  if (now - lastPositionReset < 1000) return;
+  
+  lives--;
+  
+  if (lives <= 0) {
+    gameOver();
+  } else {
+    resetPositions();
   }
 }
 
@@ -644,10 +807,24 @@ function updateGhosts() {
 function updateGame() {
   // Update ghosts
   updateGhosts();
+  
+  // Update fireballs
+  updateFireballs();
 
   // Check if Pac-Man eats pellet
   if (checkCollision(pacman, pellet)) {
     score++;
+    
+    // Increase ghost speed by 10% for each pellet eaten
+    for (const ghost of ghosts) {
+      ghost.speed = ghost.baseSpeed * (1 + (score * 0.1)); // 10% cumulative increase
+    }
+    
+    // Enable ghost shooting after 2 pellets
+    if (score >= 2) {
+      ghostsCanShoot = true;
+    }
+    
     placePelletSafely();
     if (score >= winScore) {
       endGame();
@@ -658,7 +835,7 @@ function updateGame() {
   // Check if any ghost catches Pac-Man
   for (const ghost of ghosts) {
     if (checkCollision(pacman, ghost)) {
-      gameOver();
+      loseLife();
       return;
     }
   }
@@ -736,6 +913,19 @@ function drawGame() {
     ctx.fill();
   }
 
+  // Draw fireballs
+  for (const fireball of ghostFireballs) {
+    if (fireballImg.complete) {
+      ctx.drawImage(fireballImg, fireball.x, fireball.y, fireball.width, fireball.height);
+    } else {
+      // Fallback: orange circle
+      ctx.fillStyle = 'orange';
+      ctx.beginPath();
+      ctx.arc(fireball.x + fireball.width / 2, fireball.y + fireball.height / 2, fireball.width / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
   // Draw ghosts
   for (const ghost of ghosts) {
     if (ghostImg.complete) {
@@ -751,6 +941,30 @@ function drawGame() {
   ctx.fillStyle = 'yellow';
   ctx.font = '16px "Press Start 2P", monospace';
   ctx.fillText(`Score: ${score}`, 30, 40);
+  
+  // Draw lives as hearts/rings in top right
+  const heartSize = 20;
+  const startX = isMobile() ? 500 : 750;
+  const startY = 40;
+  
+  for (let i = 0; i < lives; i++) {
+    if (heartImg.complete) {
+      ctx.drawImage(heartImg, startX - (i * (heartSize + 10)), startY - heartSize/2, heartSize, heartSize);
+    } else {
+      // Fallback: red heart shape
+      ctx.fillStyle = 'red';
+      const x = startX - (i * (heartSize + 10));
+      const y = startY - heartSize/2;
+      
+      ctx.beginPath();
+      ctx.moveTo(x + heartSize/2, y + heartSize/4);
+      ctx.bezierCurveTo(x + heartSize/2, y, x, y, x, y + heartSize/4);
+      ctx.bezierCurveTo(x, y + heartSize/2, x + heartSize/2, y + heartSize, x + heartSize/2, y + heartSize);
+      ctx.bezierCurveTo(x + heartSize/2, y + heartSize, x + heartSize, y + heartSize/2, x + heartSize, y + heartSize/4);
+      ctx.bezierCurveTo(x + heartSize, y, x + heartSize/2, y, x + heartSize/2, y + heartSize/4);
+      ctx.fill();
+    }
+  }
 }
 
 function gameLoop() {
@@ -762,29 +976,15 @@ function gameLoop() {
 
 function startGame() {
   score = 0;
-
-  if (isMobile()) {
-    // Mobile starting positions - adjusted for taller maze
-    pacman.x = 80; 
-    pacman.y = 820; // Lower position for taller maze
-    
-    // Reset ghosts for mobile layout - fixed positioning to prevent getting stuck
-    ghosts[0].x = 220; 
-    ghosts[0].y = 440; // Inside ghost house but not on a wall
-    ghosts[1].x = 280; // Fixed position so it's not stuck
-    ghosts[1].y = 440; // Clear of any walls so it can move
-  } else {
-    // Desktop starting positions (unchanged)
-    pacman.x = 50;
-    pacman.y = 450;
-    
-    // Reset ghosts for desktop layout
-    ghosts[0].x = 360;
-    ghosts[0].y = 260;
-    ghosts[1].x = 380;
-    ghosts[1].y = 260;
+  lives = 3;
+  ghostsCanShoot = false;
+  
+  // Reset ghost speeds to base speed
+  for (const ghost of ghosts) {
+    ghost.speed = ghost.baseSpeed;
   }
-
+  
+  resetPositions();
   placePelletSafely();
   gameRunning = true;
   gameLoop();
