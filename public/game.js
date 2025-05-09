@@ -821,7 +821,7 @@ function updateGame() {
     }
     
     // Enable ghost shooting after 2 pellets
-    if (score >= 2) {
+    if (score >= 3) {
       ghostsCanShoot = true;
     }
     
