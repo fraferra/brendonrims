@@ -630,8 +630,12 @@ function updateFireballs() {
     // Check collision with Pacman
     if (checkCollision(fireball, pacman)) {
       ghostFireballs.splice(i, 1); // Remove fireball
-      loseLife();
-      continue;
+      if (lives > 1) {
+        showGotYouPopup(); // Show popup instead of directly calling loseLife
+      } else {
+        loseLife(); // Go straight to game over if it's the last life
+      }
+      return; // Exit the function to prevent further processing
     }
     
     // Check collision with walls
@@ -800,6 +804,61 @@ function loseLife() {
   }
 }
 
+// Creates and shows a popup when pacman is caught
+function showGotYouPopup() {
+  // Check if popup already exists
+  if (document.getElementById('gotYouPopup')) {
+    return;
+  }
+  
+  // Create popup element
+  const popup = document.createElement('div');
+  popup.id = 'gotYouPopup';
+  popup.className = 'game-popup';
+  popup.style.display = 'flex';
+  popup.style.zIndex = '1001'; // Make sure it's above other popups
+  
+  // Calculate remaining lives (subtract 1 because we haven't called loseLife yet)
+  const remainingLives = lives - 1;
+  
+  // Create popup content
+  const content = document.createElement('div');
+  content.className = 'popup-content';
+  content.innerHTML = `
+    <h2>I got uuu!</h2>
+    <p>Only ${remainingLives} ${remainingLives === 1 ? 'life' : 'lives'} left!</p>
+    <img src="assets/gotyou.png" alt="Got You!" style="max-width: 150px; margin: 10px auto; display: block;">
+    <button id="continueBtn" class="arcade-button">CONTINUE</button>
+  `;
+  
+  // Add content to popup
+  popup.appendChild(content);
+  
+  // Add popup to body
+  document.body.appendChild(popup);
+  
+  // Add event listener to continue button
+  document.getElementById('continueBtn').addEventListener('click', function() {
+    closeGotYouPopup();
+    loseLife(); // Call loseLife after closing the popup
+  });
+  
+  // Pause the game while popup is showing
+  gameRunning = false;
+}
+
+// Function to close the popup
+function closeGotYouPopup() {
+  const popup = document.getElementById('gotYouPopup');
+  if (popup) {
+    document.body.removeChild(popup);
+    if (lives > 0) {
+      gameRunning = true; // Resume the game if still have lives
+      requestAnimationFrame(gameLoop);
+    }
+  }
+}
+
 /********************
 * MAIN GAME LOGIC
 ********************/
@@ -835,7 +894,11 @@ function updateGame() {
   // Check if any ghost catches Pac-Man
   for (const ghost of ghosts) {
     if (checkCollision(pacman, ghost)) {
-      loseLife();
+      if (lives > 1) {
+        showGotYouPopup(); // Show popup instead of directly calling loseLife
+      } else {
+        loseLife(); // Go straight to game over if it's the last life
+      }
       return;
     }
   }
@@ -943,7 +1006,7 @@ function drawGame() {
   ctx.fillText(`Score: ${score}`, 30, 40);
   
   // Draw lives as hearts/rings in top right
-  const heartSize = 20;
+  const heartSize = 30;
   const startX = isMobile() ? 500 : 750;
   const startY = 40;
   
