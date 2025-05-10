@@ -1609,6 +1609,89 @@ function stopMoving() {
   moveInterval = null;
 }
 
+// ***** Add Swipe Controls for Mobile *****
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+const minSwipeDistance = 30; // Minimum distance for a swipe to register
+let currentSwipeDirection = null;
+let swipeMoveInterval = null;
+
+// Add touch event listeners to the canvas for swipe detection
+canvas.addEventListener('touchstart', handleTouchStart, false);
+canvas.addEventListener('touchmove', handleTouchMove, false);
+canvas.addEventListener('touchend', handleTouchEnd, false);
+
+// Handle touch start - record initial touch position
+function handleTouchStart(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+}
+
+// Handle touch move - update current touch position
+function handleTouchMove(e) {
+  e.preventDefault();
+  if (!e.touches.length) return;
+  const touch = e.touches[0];
+  touchEndX = touch.clientX;
+  touchEndY = touch.clientY;
+  
+  // Calculate swipe direction
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  
+  // Only process if we've moved enough distance
+  if (Math.abs(deltaX) > minSwipeDistance || Math.abs(deltaY) > minSwipeDistance) {
+    // Determine primary direction (horizontal or vertical)
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      const direction = deltaX > 0 ? 'right' : 'left';
+      if (direction !== currentSwipeDirection) {
+        stopSwipeMoving();
+        currentSwipeDirection = direction;
+        startSwipeMoving(direction);
+      }
+    } else {
+      // Vertical swipe
+      const direction = deltaY > 0 ? 'down' : 'up';
+      if (direction !== currentSwipeDirection) {
+        stopSwipeMoving();
+        currentSwipeDirection = direction;
+        startSwipeMoving(direction);
+      }
+    }
+  }
+}
+
+// Handle touch end - stop movement when touch is released
+function handleTouchEnd(e) {
+  e.preventDefault();
+  stopSwipeMoving();
+  currentSwipeDirection = null;
+}
+
+// Start continuous movement in the swiped direction
+function startSwipeMoving(direction) {
+  if (!swipeMoveInterval) {
+    // Move immediately once
+    movePacman(direction);
+    
+    // Then set up continuous movement
+    swipeMoveInterval = setInterval(() => {
+      movePacman(direction);
+    }, 100);
+  }
+}
+
+// Stop continuous movement
+function stopSwipeMoving() {
+  clearInterval(swipeMoveInterval);
+  swipeMoveInterval = null;
+}
+
 // Attach touch events for each control button
 const upBtn = document.getElementById('upBtn');
 const downBtn = document.getElementById('downBtn');
