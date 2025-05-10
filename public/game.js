@@ -224,7 +224,7 @@ function scaleCanvas() {
   if (isMobile()) {
     // Mobile-specific scaling - increased by 15% and aligned to top
     const baseScale = Math.min(window.innerWidth / 550, window.innerHeight / 880);
-    const scale = baseScale * 1.25; // Scale up by 15%
+    const scale = baseScale * 1.20; // Scale up by 15%
     
     // Reset any previous transformations and positioning
     canvas.style.transform = '';

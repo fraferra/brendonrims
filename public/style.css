@@ -50,6 +50,7 @@ p {
 .game-rules {
   color: #f0f;
   text-shadow: 0 0 6px #f0f;
+  font-size: 0.85rem; /* Reduced font size */
 }
 
 .game-rules h2 {
