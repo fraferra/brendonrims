@@ -270,7 +270,7 @@ window.addEventListener('load', () => {
 
 // Game variables
 let score = 0;
-const winScore = 3;  // Already set to 5 pellets to win
+const winScore = 5;  // Already set to 5 pellets to win
 let gameRunning = false;
 let lives = 3; // Player starts with 3 lives
 let ghostsCanShoot = false; // Will be enabled after 2 pellets
@@ -1303,7 +1303,7 @@ function updateGame() {
     }
     
     // Enable ghost shooting after 2 pellets
-    if (score >= 1) {
+    if (score >= 2) {
       ghostsCanShoot = true;
     }
     
