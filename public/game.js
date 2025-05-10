@@ -172,6 +172,49 @@ function setupCanvas() {
     
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
+    
+    // Show the control panel on mobile with proper styling - Adding !important to override any CSS rules
+    const controlPanel = document.querySelector('.control-panel');
+    if (controlPanel) {
+      controlPanel.style.cssText = `
+        display: flex !important;
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 1000 !important;
+        background-color: rgba(0,0,0,0.6) !important;
+        padding: 15px !important;
+        border-radius: 15px !important;
+        width: 90% !important;
+        max-width: 350px !important;
+        justify-content: space-around !important;
+      `;
+      
+      // Apply non-selectable properties to all control buttons
+      const controlButtons = document.querySelectorAll('.control-btn');
+      controlButtons.forEach(btn => {
+        btn.style.cssText = `
+          user-select: none !important;
+          -webkit-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          -webkit-touch-callout: none !important;
+          touch-action: manipulation !important;
+          cursor: pointer !important;
+          -webkit-tap-highlight-color: transparent !important;
+        `;
+        
+        // Add event listeners that prevent default behavior
+        btn.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+        }, { passive: false });
+        
+        btn.addEventListener('touchend', function(e) {
+          e.preventDefault();
+        }, { passive: false });
+      });
+    }
   }
   scaleCanvas();
 }
@@ -181,7 +224,7 @@ function scaleCanvas() {
   if (isMobile()) {
     // Mobile-specific scaling - increased by 15% and aligned to top
     const baseScale = Math.min(window.innerWidth / 550, window.innerHeight / 880);
-    const scale = baseScale * 1.20; // Scale up by 15%
+    const scale = baseScale * 1.25; // Scale up by 15%
     
     // Reset any previous transformations and positioning
     canvas.style.transform = '';
@@ -232,6 +275,30 @@ function scaleCanvas() {
         max-width: 350px !important;
         justify-content: space-around !important;
       `;
+      
+      // Apply non-selectable properties to all control buttons
+      const controlButtons = document.querySelectorAll('.control-btn');
+      controlButtons.forEach(btn => {
+        btn.style.cssText = `
+          user-select: none !important;
+          -webkit-user-select: none !important;
+          -moz-user-select: none !important;
+          -ms-user-select: none !important;
+          -webkit-touch-callout: none !important;
+          touch-action: manipulation !important;
+          cursor: pointer !important;
+          -webkit-tap-highlight-color: transparent !important;
+        `;
+        
+        // Add event listeners that prevent default behavior
+        btn.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+        }, { passive: false });
+        
+        btn.addEventListener('touchend', function(e) {
+          e.preventDefault();
+        }, { passive: false });
+      });
     }
   } else {
     // Desktop scaling - set canvas to fixed size and center it
