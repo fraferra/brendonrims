@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set up control buttons for mobile
   setupControlButtons();
   
+  // Generate initial random maze
+  updateMaze();
+  
   // Set up the canvas
   setupCanvas();
 });
@@ -32,122 +35,8 @@ function isMobile() {
          /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
-// Mobile-oriented maze layout - taller than it is wide with more vertical elements
-const mobileWalls = [
-  // Outer border - use full screen width and height
-  { x: 0,   y: 0,   width: 550, height: 10 },  // Top - thinner
-  { x: 0,   y: 870, width: 550, height: 10 },  // Bottom - moved down to increase height
-  { x: 0,   y: 0,   width: 10,  height: 880 }, // Left - increased height
-  { x: 540, y: 0,   width: 10,  height: 880 }, // Right - increased height
-
-  // Top section - widened to use more horizontal space
-  { x: 40,  y: 40,  width: 150, height: 20 },
-  { x: 230, y: 40,  width: 270, height: 20 },
-  { x: 40,  y: 100, width: 100, height: 20 },
-  { x: 180, y: 100, width: 320, height: 20 },
-
-  // Vertical dividers - adjusted and extended
-  { x: 180, y: 40,  width: 20,  height: 60 },
-  { x: 350, y: 120, width: 20,  height: 220 }, // Extended
-  { x: 120, y: 180, width: 20,  height: 200 }, // Extended
-  { x: 260, y: 260, width: 20,  height: 180 }, // Extended
-
-  // Middle section with passages - adjusted for better spacing
-  { x: 40,  y: 180, width: 60,  height: 20 },
-  { x: 140, y: 180, width: 270, height: 20 },
-  { x: 40,  y: 260, width: 180, height: 20 },
-  { x: 280, y: 260, width: 190, height: 20 },
-
-  // Ghost house - repositioned lower
-  { x: 180, y: 400, width: 60,  height: 20 },  // Top left - moved down
-  { x: 280, y: 400, width: 60,  height: 20 },  // Top right - moved down
-  { x: 180, y: 400, width: 20,  height: 20 },  // Left top
-  { x: 320, y: 400, width: 20,  height: 20 },  // Right top
-  { x: 180, y: 480, width: 160, height: 20 },  // Bottom - moved down
-
-  // New middle maze section - additional walls for more vertical complexity
-  { x: 60,  y: 350, width: 100, height: 20 },
-  { x: 400, y: 350, width: 90,  height: 20 },
-  { x: 60,  y: 430, width: 80,  height: 20 },
-  { x: 380, y: 430, width: 110, height: 20 },
-  // { x: 210, y: 520, width: 130, height: 20 },
-
-  // Lower section - adjusted to use more vertical space
-  { x: 40,  y: 550, width: 160, height: 20 },
-  { x: 260, y: 550, width: 210, height: 20 },
-  { x: 120, y: 550, width: 20,  height: 100 },
-  { x: 380, y: 550, width: 20,  height: 100 },
-  { x: 40,  y: 650, width: 200, height: 20 },
-  { x: 300, y: 650, width: 170, height: 20 },
-
-  // New lower maze elements - more corridors and obstacles
-  { x: 180, y: 700, width: 20,  height: 80 },
-  { x: 350, y: 700, width: 20,  height: 80 },
-  { x: 100, y: 720, width: 80,  height: 20 },
-  { x: 370, y: 720, width: 80,  height: 20 },
-
-  // Bottom section with wider corridors
-  { x: 40,  y: 800, width: 140, height: 20 },
-  { x: 240, y: 800, width: 230, height: 20 },
-];
-
-// Desktop-oriented maze layout (our existing walls array)
-const desktopWalls = [
-  // Outer border - Modified to create more space
-  { x: 0,   y: 0,   width: 800, height: 20  }, // Top
-  { x: 0,   y: 500, width: 800, height: 20  }, // Bottom - moved down to 500 (was 480)
-  { x: 0,   y: 0,   width: 20,  height: 520 }, // Left - height extended
-  { x: 780, y: 0,   width: 20,  height: 520 }, // Right - height extended
-
-  // Top section - horizontals with 40px+ gaps between them
-  { x: 80,  y: 60,  width: 80, height: 20 },  // Reduced width for wider passage
-  { x: 200, y: 60,  width: 140, height: 20 }, // Reduced width
-  { x: 400, y: 60,  width: 140, height: 20 }, // Reduced width
-  { x: 600, y: 60,  width: 120, height: 20 }, // Reduced width
-
-  // Top section - verticals - adjusted for wider passages
-  { x: 160, y: 60,  width: 20,  height: 80 },
-  { x: 360, y: 60,  width: 20,  height: 60 },
-  { x: 560, y: 60,  width: 20,  height: 80 },
-
-  // Middle section - horizontal walls
-  { x: 60,  y: 180, width: 80, height: 20 },   // Reduced width for wider corridors
-  { x: 200, y: 180, width: 110, height: 20 },  // Reduced width
-  { x: 450, y: 180, width: 110, height: 20 },  // Moved right + reduced width
-  { x: 600, y: 180, width: 120, height: 20 },  // Reduced width
-
-  // Ghost house (center) - with openings on both left and right sides
-  { x: 320, y: 240, width: 70, height: 20 },   // Left part of top
-  { x: 450, y: 240, width: 70, height: 20 },   // Right part of top
-  { x: 320, y: 240, width: 20, height: 20 },   // Left wall top part
-  { x: 320, y: 290, width: 20, height: 20 },   // Left wall bottom part (creates opening)
-  { x: 500, y: 240, width: 20, height: 20 },   // Right wall top part
-  { x: 500, y: 290, width: 20, height: 20 },   // Right wall bottom part (maintains opening)
-  { x: 320, y: 300, width: 200, height: 20 },  // Bottom wall - unchanged
-
-  // Lower section - moved up to make more space at bottom
-  { x: 60,  y: 340, width: 140, height: 20 },  // Y moved up from 360
-  { x: 240, y: 340, width: 80,  height: 20 },  // Y moved up from 360
-  { x: 360, y: 340, width: 80,  height: 20 },  // Y moved up from 360
-  { x: 480, y: 340, width: 80,  height: 20 },  // Y moved up from 360
-  { x: 600, y: 340, width: 140, height: 20 },  // Y moved up from 360
-
-  // Lower section - vertical walls - shortened for wider passages
-  { x: 160, y: 340, width: 20,  height: 70 },  // Shortened height
-  { x: 240, y: 360, width: 20,  height: 50 },  // Shortened height
-  { x: 360, y: 360, width: 20,  height: 50 },  // Shortened height
-  { x: 480, y: 360, width: 20,  height: 50 },  // Shortened height
-  { x: 600, y: 340, width: 20,  height: 70 },  // Shortened height
-
-  // Bottom section - horizontal walls - moved up significantly for better gap
-  { x: 60,  y: 410, width: 80,  height: 20 },  // Y moved up from 440
-  { x: 280, y: 410, width: 100, height: 20 },  // Y moved up from 440
-  { x: 420, y: 410, width: 100, height: 20 },  // Y moved up from 440
-  { x: 620, y: 410, width: 120, height: 20 },  // Y moved up from 440
-];
-
 // Determine which wall layout to use
-let walls = isMobile() ? mobileWalls : desktopWalls;
+let walls = [];
 
 // Canvas size adjustment for mobile
 function setupCanvas() {
@@ -777,7 +666,7 @@ function spawnSpecialGhost() {
     y: isMobile() ? 440 : 270, // Position in ghost house
     width: 28,
     height: 28,
-    speed: 0.5, // Slightly faster than regular ghosts
+    speed: 2, // Slightly faster than regular ghosts
     baseSpeed: 0.2,
     direction: 'up',
     lastShotTime: 0,
@@ -860,43 +749,17 @@ function spawnNewGhost() {
   let attempts = 0;
   const maxAttempts = 50;
   
+  // Top left corner spawn area
+  const spawnArea = isMobile() ? 
+    { x: 40, y: 40, width: 80, height: 80 } :   // Mobile version - top left corner
+    { x: 40, y: 40, width: 100, height: 60 };   // Desktop version - top left corner
+  
   while (!validPosition && attempts < maxAttempts) {
     attempts++;
     
-    // Different spawn positions based on device
-    if (isMobile()) {
-      // For mobile, try to spawn in various areas of the maze
-      const spawnAreas = [
-        { x: 50, y: 50, width: 100, height: 100 }, // Top left
-        { x: 400, y: 50, width: 100, height: 100 }, // Top right
-        { x: 50, y: 700, width: 100, height: 100 }, // Bottom left
-        { x: 400, y: 700, width: 100, height: 100 }, // Bottom right
-        { x: 250, y: 440, width: 50, height: 30 }   // Ghost house
-      ];
-      
-      // Select a random spawn area
-      const spawnArea = spawnAreas[Math.floor(Math.random() * spawnAreas.length)];
-      
-      // Generate random coordinates within the spawn area
-      newGhost.x = spawnArea.x + Math.floor(Math.random() * spawnArea.width);
-      newGhost.y = spawnArea.y + Math.floor(Math.random() * spawnArea.height);
-    } else {
-      // For desktop, use similar approach with appropriate coordinates
-      const spawnAreas = [
-        { x: 50, y: 50, width: 100, height: 50 },    // Top left
-        { x: 650, y: 50, width: 100, height: 50 },   // Top right
-        { x: 50, y: 400, width: 100, height: 50 },   // Bottom left
-        { x: 650, y: 400, width: 100, height: 50 },  // Bottom right
-        { x: 350, y: 260, width: 100, height: 30 }   // Ghost house
-      ];
-      
-      // Select a random spawn area
-      const spawnArea = spawnAreas[Math.floor(Math.random() * spawnAreas.length)];
-      
-      // Generate random coordinates within the spawn area
-      newGhost.x = spawnArea.x + Math.floor(Math.random() * spawnArea.width);
-      newGhost.y = spawnArea.y + Math.floor(Math.random() * spawnArea.height);
-    }
+    // Generate random coordinates within the top left spawn area
+    newGhost.x = spawnArea.x + Math.floor(Math.random() * spawnArea.width);
+    newGhost.y = spawnArea.y + Math.floor(Math.random() * spawnArea.height);
     
     // Check for collisions with walls
     validPosition = true;
@@ -918,14 +781,14 @@ function spawnNewGhost() {
     }
   }
   
-  // If couldn't find valid position after several attempts, use ghost house
+  // If couldn't find valid position after several attempts, use fixed position near top left
   if (!validPosition) {
     if (isMobile()) {
-      newGhost.x = 250;
-      newGhost.y = 440;
+      newGhost.x = 60;
+      newGhost.y = 60;
     } else {
-      newGhost.x = 400;
-      newGhost.y = 260;
+      newGhost.x = 80;
+      newGhost.y = 60;
     }
   }
   
@@ -1518,6 +1381,260 @@ function closeGotYouPopup() {
 }
 
 /********************
+* MAZE GENERATION
+********************/
+
+// Generate a new maze using Sidewinder Algorithm with wider corridors
+function generateRandomMaze() {
+  // 1) Cache mobile flag
+  const mobile = isMobile();
+  
+  // 2) Fixed walls - keep the same outer walls and ghost house
+  const outerWalls = mobile ? [
+    { x: 0,   y: 0,   width: 550, height: 10 },
+    { x: 0,   y: 870, width: 550, height: 10 },
+    { x: 0,   y: 0,   width: 10,  height: 880 },
+    { x: 540, y: 0,   width: 10,  height: 880 }
+  ] : [
+    { x: 0,   y: 0,   width: 800, height: 20 },
+    { x: 0,   y: 500, width: 800, height: 20 },
+    { x: 0,   y: 0,   width: 20,  height: 520 },
+    { x: 780, y: 0,   width: 20,  height: 520 }
+  ];
+  
+  const ghostHouse = mobile ? [
+    { x: 180, y: 400, width: 60,  height: 20 },
+    { x: 280, y: 400, width: 60,  height: 20 },
+    { x: 180, y: 400, width: 20,  height: 80 },
+    { x: 320, y: 400, width: 20,  height: 80 },
+    { x: 180, y: 480, width: 160, height: 20 }
+  ] : [
+    { x: 320, y: 240, width: 70, height: 20 },
+    { x: 450, y: 240, width: 70, height: 20 },
+    { x: 320, y: 240, width: 20, height: 60 },
+    { x: 500, y: 240, width: 20, height: 60 },
+    { x: 320, y: 300, width: 200, height: 20 }
+  ];
+  
+  // 3) Define bounds & grid dimensions
+  // Increase cell size for wider corridors
+  const { minX, maxX, minY, maxY } = mobile
+    ? {minX:20, maxX:530, minY:20, maxY:860}
+    : {minX:30, maxX:770, minY:30, maxY:490};
+  const cellSize = mobile ? 40 : 50; // Increased from 30 for wider corridors
+  const wallThickness = 8; // Slightly reduced wall thickness
+  const cols = Math.floor((maxX - minX) / cellSize);
+  const rows = Math.floor((maxY - minY) / cellSize);
+  
+  // 4) Create grid to track walls
+  // Initialize with all walls present
+  const horizontalWalls = Array(rows + 1).fill().map(() => Array(cols).fill(true));
+  const verticalWalls = Array(rows).fill().map(() => Array(cols + 1).fill(true));
+  
+  // Set boundaries
+  // Always keep outer walls
+  for (let c = 0; c < cols; c++) {
+    horizontalWalls[0][c] = true; // Top row
+    horizontalWalls[rows][c] = true; // Bottom row
+  }
+  for (let r = 0; r < rows; r++) {
+    verticalWalls[r][0] = true; // Leftmost column
+    verticalWalls[r][cols] = true; // Rightmost column
+  }
+  
+  // 5) Modified Sidewinder algorithm for less density
+  // Process each row
+  for (let y = 1; y < rows; y++) {
+    let runStart = 0;
+    
+    // Process each column in the row
+    for (let x = 0; x < cols; x++) {
+      // At the eastern boundary, always carve north
+      if (x === cols - 1) {
+        // Choose a random cell from the current run to carve north
+        const cell = runStart + Math.floor(Math.random() * (x - runStart + 1));
+        horizontalWalls[y][cell] = false; // Carve north
+        
+        // Also carve north in adjacent cells for wider corridors
+        if (cell > 0) horizontalWalls[y][cell-1] = Math.random() < 0.7 ? false : horizontalWalls[y][cell-1];
+        if (cell < cols-1) horizontalWalls[y][cell+1] = Math.random() < 0.7 ? false : horizontalWalls[y][cell+1];
+        
+        runStart = x + 1; // Reset run for next iteration
+        continue;
+      }
+      
+      // Increased chance to carve east (70% instead of 50%) for wider horizontal corridors
+      if (Math.random() < 0.7) {
+        // Carve east by removing the vertical wall
+        verticalWalls[y][x + 1] = false;
+      } else {
+        // End the run and carve north from a random cell in the run
+        const cell = runStart + Math.floor(Math.random() * (x - runStart + 1));
+        horizontalWalls[y][cell] = false; // Carve north
+        
+        // Also carve north in adjacent cells sometimes for wider corridors
+        if (cell > 0) horizontalWalls[y][cell-1] = Math.random() < 0.6 ? false : horizontalWalls[y][cell-1];
+        if (cell < cols-1) horizontalWalls[y][cell+1] = Math.random() < 0.6 ? false : horizontalWalls[y][cell+1];
+        
+        runStart = x + 1; // Start a new run
+      }
+    }
+  }
+  
+  // Special handling for top row - make more openings
+  for (let x = 0; x < cols - 1; x++) {
+    if (Math.random() < 0.7) { // Increased from 0.5 to create more openings
+      verticalWalls[0][x + 1] = false; // Remove vertical walls for wider paths
+    }
+  }
+  
+  // Additional processing to make the maze more open
+  // Randomly remove some horizontal walls
+  for (let r = 1; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (Math.random() < 0.3) { // 30% chance to remove a horizontal wall
+        horizontalWalls[r][c] = false;
+      }
+    }
+  }
+  
+  // Randomly remove some vertical walls
+  for (let r = 0; r < rows; r++) {
+    for (let c = 1; c < cols; c++) {
+      if (Math.random() < 0.3) { // 30% chance to remove a vertical wall
+        verticalWalls[r][c] = false;
+      }
+    }
+  }
+  
+  // 6) Convert grid to wall objects
+  const maze = [...outerWalls, ...ghostHouse];
+  
+  // Add horizontal walls where horizontalWalls[r][c] is true
+  for (let r = 0; r <= rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (horizontalWalls[r][c]) {
+        maze.push({
+          x: minX + c * cellSize,
+          y: minY + r * cellSize,
+          width: cellSize,
+          height: wallThickness
+        });
+      }
+    }
+  }
+  
+  // Add vertical walls where verticalWalls[r][c] is true
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c <= cols; c++) {
+      if (verticalWalls[r][c]) {
+        maze.push({
+          x: minX + c * cellSize,
+          y: minY + r * cellSize,
+          width: wallThickness,
+          height: cellSize
+        });
+      }
+    }
+  }
+  
+  // 7) Remove walls that might overlap with ghost house or starting positions
+  // Define ghost house area in grid coordinates
+  const ghostAreaGrid = mobile ? {
+    minCol: Math.floor((180 - minX) / cellSize),
+    maxCol: Math.ceil((340 - minX) / cellSize),
+    minRow: Math.floor((400 - minY) / cellSize),
+    maxRow: Math.ceil((480 - minY) / cellSize)
+  } : {
+    minCol: Math.floor((320 - minX) / cellSize),
+    maxCol: Math.ceil((520 - minX) / cellSize),
+    minRow: Math.floor((240 - minY) / cellSize),
+    maxRow: Math.ceil((320 - minY) / cellSize)
+  };
+  
+  // Define top right corner area for easter egg access
+  const easterEggArea = mobile ? {
+    minCol: Math.floor((470 - minX) / cellSize),
+    maxCol: Math.ceil((540 - minX) / cellSize),
+    minRow: Math.floor((10 - minY) / cellSize),
+    maxRow: Math.ceil((70 - minY) / cellSize)
+  } : {
+    minCol: Math.floor((700 - minX) / cellSize),
+    maxCol: Math.ceil((780 - minX) / cellSize),
+    minRow: Math.floor((20 - minY) / cellSize),
+    maxRow: Math.ceil((80 - minY) / cellSize)
+  };
+  
+  // Define starting positions area with a larger clear radius for better movement
+  const pacmanStart = mobile ? 
+    { col: Math.floor((80 - minX) / cellSize), row: Math.floor((820 - minY) / cellSize) } :
+    { col: Math.floor((50 - minX) / cellSize), row: Math.floor((450 - minY) / cellSize) };
+  
+  // Filter walls that might interfere with ghost house, starting positions, or easter egg area
+  const clearAreas = (wall) => {
+    // Skip checking outer walls and ghost house since we always want to keep them
+    if (outerWalls.includes(wall) || ghostHouse.includes(wall)) {
+      return true;
+    }
+    
+    // Convert wall to grid coordinates
+    const wallMinCol = Math.floor((wall.x - minX) / cellSize);
+    const wallMaxCol = Math.ceil((wall.x + wall.width - minX) / cellSize);
+    const wallMinRow = Math.floor((wall.y - minY) / cellSize);
+    const wallMaxRow = Math.ceil((wall.y + wall.height - minY) / cellSize);
+    
+    // Check if this wall overlaps with ghost house area
+    if (wallMaxCol >= ghostAreaGrid.minCol && wallMinCol <= ghostAreaGrid.maxCol &&
+        wallMaxRow >= ghostAreaGrid.minRow && wallMinRow <= ghostAreaGrid.maxRow) {
+      return false;
+    }
+    
+    // Check if this wall blocks top right corner easter egg area
+    if (wallMaxCol >= easterEggArea.minCol && wallMinCol <= easterEggArea.maxCol &&
+        wallMaxRow >= easterEggArea.minRow && wallMinRow <= easterEggArea.maxRow) {
+      return false;
+    }
+    
+    // Check if this wall blocks pacman starting position with a larger radius
+    const pacmanClearRadius = 3; // Increased from 2 to create more open space around start
+    if (Math.abs(wallMinCol - pacmanStart.col) <= pacmanClearRadius && 
+        Math.abs(wallMinRow - pacmanStart.row) <= pacmanClearRadius) {
+      return false;
+    }
+    
+    return true;
+  };
+  
+  // Get the filtered maze
+  const filteredMaze = maze.filter(clearAreas);
+  
+  // Ensure path to easter egg area by removing additional walls if needed
+  // Create a path from center to top right corner
+  const pathToCorner = mobile ? [
+    { x: 350, y: 50, width: 150, height: 8 }, // Horizontal path near top
+    { x: 480, y: 50, width: 8, height: 150 }  // Vertical path on right side
+  ] : [
+    { x: 500, y: 50, width: 220, height: 8 }, // Horizontal path near top
+    { x: 700, y: 50, width: 8, height: 150 }  // Vertical path on right side
+  ];
+  
+  // Return the final maze with ensured corner access
+  return [...filteredMaze, ...pathToCorner];
+}
+
+// Update the game's maze
+function updateMaze() {
+  walls = generateRandomMaze();
+  console.log("New maze generated with", walls.length, "walls");
+  
+  // Reset the game graph when maze changes
+  if (window.gameGraph) {
+    window.gameGraph = null;
+    window.lastGraphUpdateTime = 0;
+  }
+}
+
+/********************
 * MAIN GAME LOGIC
 ********************/
 
@@ -1762,6 +1879,10 @@ function startGame() {
 */
 function endGame() {
   gameRunning = false;
+  
+  // Generate a new maze for the next game
+  updateMaze();
+  
   // Show the win popup instead of using alert
   const winPopup = document.getElementById('winPopup');
   winPopup.style.display = 'flex';
@@ -1796,6 +1917,10 @@ function endGame() {
 
 function gameOver() {
   gameRunning = false;
+  
+  // Generate a new maze for the next game
+  updateMaze();
+  
   // Show the game over popup
   const gameOverPopup = document.getElementById('gameOverPopup');
   gameOverPopup.style.display = 'flex';

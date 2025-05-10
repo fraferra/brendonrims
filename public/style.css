@@ -46,6 +46,17 @@ p {
   text-align: center;
 }
 
+/* Game Rules Styling */
+.game-rules {
+  color: #f0f;
+  text-shadow: 0 0 6px #f0f;
+}
+
+.game-rules h2 {
+  color: #0ff;
+  text-shadow: 0 0 8px #0ff;
+}
+
 /* 4) Sprite Container */
 .sprite-container {
   display: flex;
@@ -187,7 +198,7 @@ p {
   left: 0;
   width: 100%;
   padding: 10px;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: transparent; /* Changed from rgba(0, 0, 0, 0.5) to transparent */
 }
 
 /* Remove horizontal controls div since buttons are now in one row */
@@ -278,7 +289,7 @@ p {
     transform: translateX(-50%);
     width: 90%;
     max-width: 350px;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: transparent; /* Changed from rgba(0, 0, 0, 0.6) to transparent */
     border-radius: 15px;
     padding: 10px;
     z-index: 1000;
