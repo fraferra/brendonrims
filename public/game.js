@@ -270,7 +270,7 @@ window.addEventListener('load', () => {
 
 // Game variables
 let score = 0;
-const winScore = 5;  // Already set to 5 pellets to win
+const winScore = 3;  // Already set to 5 pellets to win
 let gameRunning = false;
 let lives = 3; // Player starts with 3 lives
 let ghostsCanShoot = false; // Will be enabled after 2 pellets
@@ -688,7 +688,6 @@ function spawnSpecialGhost() {
   
   // Show a small notification
   const notification = document.createElement('div');
-  notification.textContent = "Easter Egg Found: TANUKI Ghost Awakened!";
   notification.style.position = "absolute";
   notification.style.top = "80px";
   notification.style.left = "50%";
@@ -700,6 +699,25 @@ function spawnSpecialGhost() {
   notification.style.zIndex = "1000";
   notification.style.fontFamily = "'Press Start 2P', monospace";
   notification.style.fontSize = "12px";
+  notification.style.display = "flex";
+  notification.style.alignItems = "center";
+  notification.style.gap = "10px";
+  
+  // Add text content
+  const textElement = document.createElement('div');
+  textElement.textContent = "Easter Egg Found: TANUKI Ghost Awakened!";
+  
+  // Add ghost image
+  const ghostImage = document.createElement('img');
+  ghostImage.src = specialGhostImg.src;
+  ghostImage.style.width = "30px";
+  ghostImage.style.height = "30px";
+  ghostImage.style.imageRendering = "pixelated";
+  
+  // Add both elements to notification
+  notification.appendChild(ghostImage);
+  notification.appendChild(textElement);
+  
   document.body.appendChild(notification);
   
   // Remove notification after a few seconds
@@ -1285,7 +1303,7 @@ function updateGame() {
     }
     
     // Enable ghost shooting after 2 pellets
-    if (score >= 3) {
+    if (score >= 1) {
       ghostsCanShoot = true;
     }
     
