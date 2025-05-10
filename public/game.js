@@ -776,7 +776,7 @@ function spawnSpecialGhost() {
     y: isMobile() ? 440 : 270, // Position in ghost house
     width: 28,
     height: 28,
-    speed: 0.5, // Slightly faster than regular ghosts
+    speed: 0.8, // Slightly faster than regular ghosts
     baseSpeed: 0.2,
     direction: 'up',
     lastShotTime: 0,
