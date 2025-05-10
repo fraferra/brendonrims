@@ -229,7 +229,7 @@ function scaleCanvas() {
     // Reset any previous transformations and positioning
     canvas.style.transform = '';
     canvas.style.position = 'absolute';
-    canvas.style.top = '0';
+    canvas.style.top = '-20px'; // Move canvas up by 20px to create more space at bottom
     canvas.style.left = '0';
     canvas.style.marginLeft = '0';
     canvas.style.marginTop = '0';
@@ -246,7 +246,7 @@ function scaleCanvas() {
       container.style.position = 'relative';
       container.style.overflow = 'hidden';
       container.style.paddingTop = '0';
-      container.style.paddingBottom = '120px'; // Add padding for controls
+      container.style.paddingBottom = '150px'; // Increased padding for controls
       
       // Remove any wrappers
       if (document.getElementById('canvasWrapper')) {
