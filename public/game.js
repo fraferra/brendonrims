@@ -16,7 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // (Other event listeners for mobile controls, etc.)
+  // Set up control buttons for mobile
+  setupControlButtons();
+  
+  // Set up the canvas
   setupCanvas();
 });
 
@@ -196,11 +199,11 @@ function scaleCanvas() {
     if (container) {
       container.style.width = '100%';
       container.style.height = '100vh';
-      container.style.display = 'block'; // Changed from flex to block
+      container.style.display = 'block'; 
       container.style.position = 'relative';
       container.style.overflow = 'hidden';
       container.style.paddingTop = '0';
-      container.style.paddingBottom = '15vh'; // Space for controls
+      container.style.paddingBottom = '120px'; // Add padding for controls
       
       // Remove any wrappers
       if (document.getElementById('canvasWrapper')) {
@@ -212,11 +215,21 @@ function scaleCanvas() {
       }
     }
     
-    // Ensure the control panel stays at the bottom
+    // Show the control panel on mobile with proper styling
     const controlPanel = document.querySelector('.control-panel');
     if (controlPanel) {
-      controlPanel.style.bottom = '2vh';
-      controlPanel.style.zIndex = '1000';
+      controlPanel.style.display = 'flex';
+      controlPanel.style.position = 'fixed';
+      controlPanel.style.bottom = '20px';
+      controlPanel.style.left = '50%';
+      controlPanel.style.transform = 'translateX(-50%)';
+      controlPanel.style.zIndex = '100';
+      controlPanel.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      controlPanel.style.padding = '15px';
+      controlPanel.style.borderRadius = '15px';
+      controlPanel.style.width = '80%';
+      controlPanel.style.maxWidth = '300px';
+      controlPanel.style.justifyContent = 'center';
     }
   } else {
     // Desktop scaling - set canvas to fixed size and center it
@@ -268,6 +281,48 @@ window.addEventListener('load', () => {
   scaleCanvas();
 });
 
+// Set up control button event listeners
+function setupControlButtons() {
+  // Add touch event listeners for mobile control buttons
+  const upBtn = document.getElementById('upBtn');
+  const downBtn = document.getElementById('downBtn');
+  const leftBtn = document.getElementById('leftBtn');
+  const rightBtn = document.getElementById('rightBtn');
+  
+  // Set up touch events for all buttons
+  if (upBtn) {
+    upBtn.addEventListener('touchstart', () => startMoving('up'), false);
+    upBtn.addEventListener('touchend', stopMoving, false);
+    upBtn.addEventListener('mousedown', () => startMoving('up'), false);
+    upBtn.addEventListener('mouseup', stopMoving, false);
+    upBtn.addEventListener('mouseleave', stopMoving, false);
+  }
+  
+  if (downBtn) {
+    downBtn.addEventListener('touchstart', () => startMoving('down'), false);
+    downBtn.addEventListener('touchend', stopMoving, false);
+    downBtn.addEventListener('mousedown', () => startMoving('down'), false);
+    downBtn.addEventListener('mouseup', stopMoving, false);
+    downBtn.addEventListener('mouseleave', stopMoving, false);
+  }
+  
+  if (leftBtn) {
+    leftBtn.addEventListener('touchstart', () => startMoving('left'), false);
+    leftBtn.addEventListener('touchend', stopMoving, false);
+    leftBtn.addEventListener('mousedown', () => startMoving('left'), false);
+    leftBtn.addEventListener('mouseup', stopMoving, false);
+    leftBtn.addEventListener('mouseleave', stopMoving, false);
+  }
+  
+  if (rightBtn) {
+    rightBtn.addEventListener('touchstart', () => startMoving('right'), false);
+    rightBtn.addEventListener('touchend', stopMoving, false);
+    rightBtn.addEventListener('mousedown', () => startMoving('right'), false);
+    rightBtn.addEventListener('mouseup', stopMoving, false);
+    rightBtn.addEventListener('mouseleave', stopMoving, false);
+  }
+}
+
 // Game variables
 let score = 0;
 const winScore = 5;  // Already set to 5 pellets to win
@@ -276,6 +331,7 @@ let lives = 3; // Player starts with 3 lives
 let ghostsCanShoot = false; // Will be enabled after 2 pellets
 let ghostFireballs = []; // Array to store active fireballs
 let lastPositionReset = 0; // Timestamp of last position reset
+const maxGhosts = 10; // Limit the total number of ghosts to prevent excessive difficulty
 
 // Pac-Man object - adjusted to be slightly smaller than corridor width
 const pacman = {
@@ -298,28 +354,7 @@ const pellet = {
 };
 
 // Ghosts: placed in the ghost house, not inside walls
-const ghosts = [
-  {
-    x: 360, // Inside ghost house
-    y: 240, 
-    width: 28,
-    height: 28,
-    speed: 0.3, // Base speed
-    baseSpeed: 0.3, // Store original speed for resets
-    direction: 'right', // Track direction for shooting
-    lastShotTime: 0, // Track when ghost last shot
-  },
-  {
-    x: 440, // Inside ghost house
-    y: 240,
-    width: 28,
-    height: 28,
-    speed: 0.3, // Base speed
-    baseSpeed: 0.3, // Store original speed for resets
-    direction: 'left', // Track direction for shooting
-    lastShotTime: 0, // Track when ghost last shot
-  }
-];
+const ghosts = [];
 
 // Load heart/ring image for lives
 const heartImg = new Image();
@@ -724,6 +759,142 @@ function spawnSpecialGhost() {
   setTimeout(() => {
     document.body.removeChild(notification);
   }, 3000);
+}
+
+// Function to spawn a new ghost at a valid location
+function spawnNewGhost() {
+  // Check if we've reached the maximum number of ghosts
+  if (ghosts.length >= maxGhosts) {
+    return;
+  }
+
+  // Increased speed for new ghosts based on current score
+  // Each ghost is 15% faster than base speed, plus 5% per existing ghost
+  const speedMultiplier = 1.15 + (0.05 * score);
+  
+  // Create ghost object
+  const newGhost = {
+    width: 28,
+    height: 28,
+    speed: 0.3 * speedMultiplier, // Speed increases with score
+    baseSpeed: 0.3 * speedMultiplier, // Store original speed for resets
+    direction: ['up', 'down', 'left', 'right'][Math.floor(Math.random() * 4)], // Random direction
+    lastShotTime: 0,
+    // For stability tracking
+    lastDirection: null,
+    directionTimer: 0,
+    stuckCounter: 0
+  };
+  
+  // Find a valid position for the ghost
+  let validPosition = false;
+  let attempts = 0;
+  const maxAttempts = 50;
+  
+  while (!validPosition && attempts < maxAttempts) {
+    attempts++;
+    
+    // Different spawn positions based on device
+    if (isMobile()) {
+      // For mobile, try to spawn in various areas of the maze
+      const spawnAreas = [
+        { x: 50, y: 50, width: 100, height: 100 }, // Top left
+        { x: 400, y: 50, width: 100, height: 100 }, // Top right
+        { x: 50, y: 700, width: 100, height: 100 }, // Bottom left
+        { x: 400, y: 700, width: 100, height: 100 }, // Bottom right
+        { x: 250, y: 440, width: 50, height: 30 }   // Ghost house
+      ];
+      
+      // Select a random spawn area
+      const spawnArea = spawnAreas[Math.floor(Math.random() * spawnAreas.length)];
+      
+      // Generate random coordinates within the spawn area
+      newGhost.x = spawnArea.x + Math.floor(Math.random() * spawnArea.width);
+      newGhost.y = spawnArea.y + Math.floor(Math.random() * spawnArea.height);
+    } else {
+      // For desktop, use similar approach with appropriate coordinates
+      const spawnAreas = [
+        { x: 50, y: 50, width: 100, height: 50 },    // Top left
+        { x: 650, y: 50, width: 100, height: 50 },   // Top right
+        { x: 50, y: 400, width: 100, height: 50 },   // Bottom left
+        { x: 650, y: 400, width: 100, height: 50 },  // Bottom right
+        { x: 350, y: 260, width: 100, height: 30 }   // Ghost house
+      ];
+      
+      // Select a random spawn area
+      const spawnArea = spawnAreas[Math.floor(Math.random() * spawnAreas.length)];
+      
+      // Generate random coordinates within the spawn area
+      newGhost.x = spawnArea.x + Math.floor(Math.random() * spawnArea.width);
+      newGhost.y = spawnArea.y + Math.floor(Math.random() * spawnArea.height);
+    }
+    
+    // Check for collisions with walls
+    validPosition = true;
+    for (const wall of walls) {
+      if (checkCollision(newGhost, wall)) {
+        validPosition = false;
+        break;
+      }
+    }
+    
+    // Check for collisions with other ghosts
+    if (validPosition) {
+      for (const ghost of ghosts) {
+        if (checkCollision(newGhost, ghost)) {
+          validPosition = false;
+          break;
+        }
+      }
+    }
+  }
+  
+  // If couldn't find valid position after several attempts, use ghost house
+  if (!validPosition) {
+    if (isMobile()) {
+      newGhost.x = 250;
+      newGhost.y = 440;
+    } else {
+      newGhost.x = 400;
+      newGhost.y = 260;
+    }
+  }
+  
+  // Randomly choose a ghost color/type
+  const ghostTypes = [
+    { color: '#FF0000', img: ghostImg }, // Red ghost (default)
+    { color: '#00FFFF', img: ghostImg }, // Cyan ghost
+    { color: '#FFC0CB', img: ghostImg }, // Pink ghost
+    { color: '#FFA500', img: ghostImg }  // Orange ghost
+  ];
+  
+  const ghostType = ghostTypes[Math.floor(Math.random() * ghostTypes.length)];
+  newGhost.color = ghostType.color;
+  
+  // Add the new ghost to the array
+  ghosts.push(newGhost);
+  
+  // Show a brief notification that a new ghost has appeared
+  const notification = document.createElement('div');
+  notification.style.position = 'absolute';
+  notification.style.top = '80px';
+  notification.style.left = '50%';
+  notification.style.transform = 'translateX(-50%)';
+  notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+  notification.style.color = ghostType.color;
+  notification.style.padding = '10px';
+  notification.style.borderRadius = '5px';
+  notification.style.zIndex = '1000';
+  notification.style.fontFamily = "'Press Start 2P', monospace";
+  notification.style.fontSize = '12px';
+  notification.innerHTML = 'New Ghost Appeared!';
+  
+  document.body.appendChild(notification);
+  
+  // Remove notification after a short time
+  setTimeout(() => {
+    document.body.removeChild(notification);
+  }, 1500);
 }
 
 // Enhanced safe pellet placement
@@ -1297,6 +1468,9 @@ function updateGame() {
   if (checkCollision(pacman, pellet)) {
     score++;
     
+    // Spawn a new ghost when pellet is eaten
+    spawnNewGhost();
+    
     // Increase ghost speed by 10% for each pellet eaten
     for (const ghost of ghosts) {
       ghost.speed = ghost.baseSpeed * (1 + (score * 0.1)); // 10% cumulative increase
@@ -1412,7 +1586,7 @@ function drawGame() {
     }
   }
 
-  // Draw ghosts
+  // Draw ghosts - modified to remove background color
   for (const ghost of ghosts) {
     if (ghost.isSpecial) {
       // Draw special ghost with different image
@@ -1424,8 +1598,9 @@ function drawGame() {
         ctx.fillRect(ghost.x, ghost.y, ghost.width, ghost.height);
       }
     } else {
-      // Draw regular ghost
+      // Draw regular ghost without color tint
       if (ghostImg.complete) {
+        // Draw ghost image directly without color overlay
         ctx.drawImage(ghostImg, ghost.x, ghost.y, ghost.width, ghost.height);
       } else {
         // Fallback: red square
@@ -1478,13 +1653,33 @@ function startGame() {
   ghostsCanShoot = false;
   easterEggTriggered = false; // Reset easter egg on game start
   
-  // Reset ghost speeds to base speed
-  for (const ghost of ghosts) {
-    ghost.speed = ghost.baseSpeed;
-  }
+  // Reset ghosts array to initial state (just 2 ghosts)
+  ghosts.length = 0; // Clear array
   
-  // Reset ghosts array to initial state (removing any special ghosts)
-  ghosts.length = 2;
+  // Add initial ghosts
+  ghosts.push({
+    x: isMobile() ? 220 : 360, 
+    y: isMobile() ? 440 : 240,
+    width: 28,
+    height: 28,
+    speed: 0.3,
+    baseSpeed: 0.3,
+    direction: 'right',
+    lastShotTime: 0,
+    color: '#FF0000' // Red ghost
+  });
+  
+  ghosts.push({
+    x: isMobile() ? 280 : 440,
+    y: isMobile() ? 440 : 240,
+    width: 28,
+    height: 28,
+    speed: 0.3,
+    baseSpeed: 0.3,
+    direction: 'left', 
+    lastShotTime: 0,
+    color: '#00FFFF' // Cyan ghost
+  });
   
   resetPositions();
   placePelletSafely();
@@ -1569,29 +1764,6 @@ document.addEventListener('keydown', (e) => {
   movePacman(direction);
 });
 
-// Optional mobile controls
-// Desktop keydown event listener
-document.addEventListener('keydown', (e) => {
-  let direction = null;
-  switch (e.key) {
-    case 'ArrowUp':
-      direction = 'up';
-      break;
-    case 'ArrowDown':
-      direction = 'down';
-      break;
-    case 'ArrowLeft':
-      direction = 'left';
-      break;
-    case 'ArrowRight':
-      direction = 'right';
-      break;
-    default:
-      return;
-  }
-  movePacman(direction);
-});
-
 // ***** New Mobile Control Code for Continuous Movement *****
 let moveInterval = null;
 
@@ -1609,69 +1781,88 @@ function stopMoving() {
   moveInterval = null;
 }
 
-// Attach touch events for each control button
-const upBtn = document.getElementById('upBtn');
-const downBtn = document.getElementById('downBtn');
-const leftBtn = document.getElementById('leftBtn');
-const rightBtn = document.getElementById('rightBtn');
+// ***** Add Swipe Controls for Mobile *****
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+const minSwipeDistance = 30; // Minimum distance for a swipe to register
+let currentSwipeDirection = null;
+let swipeMoveInterval = null;
 
-if (upBtn) {
-  upBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startMoving('up');
-  });
-  upBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopMoving();
-  });
+// Add touch event listeners to the canvas for swipe detection
+canvas.addEventListener('touchstart', handleTouchStart, false);
+canvas.addEventListener('touchmove', handleTouchMove, false);
+canvas.addEventListener('touchend', handleTouchEnd, false);
+
+// Handle touch start - record initial touch position
+function handleTouchStart(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
 }
 
-if (downBtn) {
-  downBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startMoving('down');
-  });
-  downBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopMoving();
-  });
-}
-
-if (leftBtn) {
-  leftBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startMoving('left');
-  });
-  leftBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopMoving();
-  });
-}
-
-if (rightBtn) {
-  rightBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startMoving('right');
-  });
-  rightBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopMoving();
-  });
-}
-// ***** End of New Mobile Control Code *****
-
-// Start game after username is entered
-document.getElementById('startGame').addEventListener('click', () => {
-  const username = document.getElementById('usernameInput').value.trim();
-  if (username) {
-    document.getElementById('usernamePrompt').style.display = 'none';
-    document.getElementById('gameContainer').style.display = 'block';
-    startGame();
-  } else {
-    alert('Please enter a username.');
+// Handle touch move - update current touch position
+function handleTouchMove(e) {
+  e.preventDefault();
+  if (!e.touches.length) return;
+  const touch = e.touches[0];
+  touchEndX = touch.clientX;
+  touchEndY = touch.clientY;
+  
+  // Calculate swipe direction
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  
+  // Only process if we've moved enough distance
+  if (Math.abs(deltaX) > minSwipeDistance || Math.abs(deltaY) > minSwipeDistance) {
+    // Determine primary direction (horizontal or vertical)
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      const direction = deltaX > 0 ? 'right' : 'left';
+      if (direction !== currentSwipeDirection) {
+        stopSwipeMoving();
+        currentSwipeDirection = direction;
+        startSwipeMoving(direction);
+      }
+    } else {
+      // Vertical swipe
+      const direction = deltaY > 0 ? 'down' : 'up';
+      if (direction !== currentSwipeDirection) {
+        stopSwipeMoving();
+        currentSwipeDirection = direction;
+        startSwipeMoving(direction);
+      }
+    }
   }
-});
+}
 
+// Handle touch end - stop movement when touch is released
+function handleTouchEnd(e) {
+  e.preventDefault();
+  stopSwipeMoving();
+  currentSwipeDirection = null;
+}
+
+// Start continuous movement in the swiped direction
+function startSwipeMoving(direction) {
+  if (!swipeMoveInterval) {
+    // Move immediately once
+    movePacman(direction);
+    
+    // Then set up continuous movement
+    swipeMoveInterval = setInterval(() => {
+      movePacman(direction);
+    }, 100);
+  }
+}
+
+// Stop continuous movement
+function stopSwipeMoving() {
+  clearInterval(swipeMoveInterval);
+  swipeMoveInterval = null;
+}
 
 // Start game after username is entered
 document.getElementById('startGame').addEventListener('click', () => {
