@@ -304,8 +304,8 @@ const ghosts = [
     y: 240, 
     width: 28,
     height: 28,
-    speed: 0.20, // Base speed
-    baseSpeed: 0.20, // Store original speed for resets
+    speed: 0.15, // Base speed
+    baseSpeed: 0.15, // Store original speed for resets
     direction: 'right', // Track direction for shooting
     lastShotTime: 0, // Track when ghost last shot
   },
@@ -314,8 +314,8 @@ const ghosts = [
     y: 240,
     width: 28,
     height: 28,
-    speed: 0.20, // Base speed
-    baseSpeed: 0.20, // Store original speed for resets
+    speed: 0.15, // Base speed
+    baseSpeed: 0.15, // Store original speed for resets
     direction: 'left', // Track direction for shooting
     lastShotTime: 0, // Track when ghost last shot
   }
@@ -333,11 +333,17 @@ fireballImg.src = 'assets/fireball.png'; // Make sure this image exists in your 
 const pacmanImg = new Image();
 pacmanImg.src = 'assets/custom_pacman.png';
 const ghostImg = new Image();
-ghostImg.src = 'assets/custom_ghost.png';
+ghostImg.src = 'assets/gotyou.png';
+
+// Easter egg ghost image
+const specialGhostImg = new Image();
+specialGhostImg.src = 'assets/ghost2.png'; // Using this as the special ghost image
 
 const pelletImg = new Image();
 pelletImg.src = 'assets/pellet.png';
 
+// Easter egg tracking
+let easterEggTriggered = false;
 
 /********************
 * HELPER FUNCTIONS
@@ -365,6 +371,341 @@ function checkCollisionY(r1, r2) {
       r1.y < r2.y + r2.height &&
       r1.y + r1.height > r2.y
   );
+}
+
+// Calculate Euclidean distance between two points
+function calculateDistance(x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
+// Convert a position to a grid cell
+function positionToGridCell(x, y, cellSize) {
+  return {
+    col: Math.floor(x / cellSize),
+    row: Math.floor(y / cellSize)
+  };
+}
+
+// Check if a grid cell contains a wall
+function isCellBlocked(col, row, cellSize) {
+  // Create a test point in the center of the cell
+  const testPoint = {
+    x: col * cellSize + cellSize / 2,
+    y: row * cellSize + cellSize / 2,
+    width: cellSize - 2, // Almost full cell size
+    height: cellSize - 2
+  };
+  
+  // Check collision with any wall
+  for (const wall of walls) {
+    if (checkCollision(testPoint, wall)) {
+      return true;
+    }
+  }
+  
+  // Check boundaries
+  if (isMobile()) {
+    if (testPoint.x < 10 || testPoint.x + testPoint.width > 540 || 
+        testPoint.y < 10 || testPoint.y + testPoint.height > 860) {
+      return true;
+    }
+  } else {
+    if (testPoint.x < 20 || testPoint.x + testPoint.width > 780 || 
+        testPoint.y < 20 || testPoint.y + testPoint.height > 480) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+// Build adjacency list representing the game grid
+function buildAdjacencyGraph(cellSize) {
+  const graph = {};
+  const maxCol = isMobile() ? Math.ceil(550 / cellSize) : Math.ceil(800 / cellSize);
+  const maxRow = isMobile() ? Math.ceil(880 / cellSize) : Math.ceil(520 / cellSize);
+  
+  // Create nodes for all non-blocked cells
+  for (let col = 0; col < maxCol; col++) {
+    for (let row = 0; row < maxRow; row++) {
+      if (!isCellBlocked(col, row, cellSize)) {
+        const nodeId = `${col},${row}`;
+        graph[nodeId] = [];
+        
+        // Check all 4 adjacent cells and add edges if they're not blocked
+        const directions = [
+          { dc: 0, dr: -1 }, // up
+          { dc: 1, dr: 0 },  // right
+          { dc: 0, dr: 1 },  // down
+          { dc: -1, dr: 0 }  // left
+        ];
+        
+        for (const dir of directions) {
+          const adjCol = col + dir.dc;
+          const adjRow = row + dir.dr;
+          
+          if (adjCol >= 0 && adjCol < maxCol && adjRow >= 0 && adjRow < maxRow && 
+              !isCellBlocked(adjCol, adjRow, cellSize)) {
+            const adjNodeId = `${adjCol},${adjRow}`;
+            graph[nodeId].push({
+              id: adjNodeId,
+              weight: 1  // All adjacent cells have the same weight of 1
+            });
+          }
+        }
+      }
+    }
+  }
+  
+  return graph;
+}
+
+// Implementation of Dijkstra's algorithm
+function dijkstra(graph, startNodeId, endNodeId) {
+  // Priority queue to store nodes to visit
+  const queue = [];
+  
+  // Distances from start node to each node
+  const distances = {};
+  
+  // Previous node in the optimal path
+  const previous = {};
+  
+  // Initialize all nodes with infinite distance
+  for (const nodeId in graph) {
+    distances[nodeId] = Infinity;
+    previous[nodeId] = null;
+  }
+  
+  // Distance to start is 0
+  distances[startNodeId] = 0;
+  queue.push({ id: startNodeId, priority: 0 });
+  
+  while (queue.length > 0) {
+    // Sort queue by priority (distance)
+    queue.sort((a, b) => a.priority - b.priority);
+    
+    // Get the node with the smallest distance
+    const current = queue.shift();
+    
+    // If we reached the target, we're done
+    if (current.id === endNodeId) {
+      break;
+    }
+    
+    // Process each neighbor
+    for (const neighbor of graph[current.id] || []) {
+      // Calculate new distance
+      const alt = distances[current.id] + neighbor.weight;
+      
+      // If we found a better path
+      if (alt < distances[neighbor.id]) {
+        distances[neighbor.id] = alt;
+        previous[neighbor.id] = current.id;
+        
+        // Add to queue with updated priority
+        queue.push({ id: neighbor.id, priority: alt });
+      }
+    }
+  }
+  
+  // Reconstruct path
+  const path = [];
+  let current = endNodeId;
+  
+  // If end node is unreachable
+  if (previous[current] === null && current !== startNodeId) {
+    return null; // No path exists
+  }
+  
+  while (current !== null) {
+    path.unshift(current);
+    current = previous[current];
+  }
+  
+  return path;
+}
+
+// Get direction from path
+function getDirectionFromPath(path, ghost, cellSize) {
+  if (!path || path.length < 2) {
+    return null;
+  }
+  
+  // Current position in grid coordinates
+  const [currentCol, currentRow] = path[0].split(',').map(Number);
+  
+  // Next position in grid coordinates
+  const [nextCol, nextRow] = path[1].split(',').map(Number);
+  
+  // Determine direction
+  if (nextCol > currentCol) return 'right';
+  if (nextCol < currentCol) return 'left';
+  if (nextRow > currentRow) return 'down';
+  if (nextRow < currentRow) return 'up';
+  
+  return null;
+}
+
+// Main function to find best direction using Dijkstra's algorithm
+function findBestDirection(ghost, targetX, targetY) {
+  const cellSize = 20; // Size of each grid cell
+  
+  // Convert ghost and target positions to grid cells
+  const ghostCell = positionToGridCell(ghost.x, ghost.y, cellSize);
+  const targetCell = positionToGridCell(targetX, targetY, cellSize);
+  
+  // Build the graph if it hasn't been built yet or needs to be updated
+  if (!window.gameGraph || !window.lastGraphUpdateTime || 
+      Date.now() - window.lastGraphUpdateTime > 5000) { // Update graph every 5 seconds
+    window.gameGraph = buildAdjacencyGraph(cellSize);
+    window.lastGraphUpdateTime = Date.now();
+  }
+  
+  // Ghost's current position as string ID
+  const startNodeId = `${ghostCell.col},${ghostCell.row}`;
+  
+  // Target position as string ID
+  const endNodeId = `${targetCell.col},${targetCell.row}`;
+  
+  // Find the shortest path using Dijkstra's algorithm
+  const path = dijkstra(window.gameGraph, startNodeId, endNodeId);
+  
+  // Get next direction from path
+  const nextDirection = getDirectionFromPath(path, ghost, cellSize);
+  
+  // If no path is found or we're at the destination, fall back to wall-following
+  if (!nextDirection) {
+    // Initialize wall following if needed
+    if (!ghost.wallFollowing) {
+      ghost.wallFollowing = true;
+      ghost.wallFollowDir = Math.random() < 0.5 ? 'clockwise' : 'counterclockwise';
+    }
+    
+    const directions = [
+      { name: 'up', dx: 0, dy: -1 },
+      { name: 'right', dx: 1, dy: 0 },
+      { name: 'down', dx: 0, dy: 1 },
+      { name: 'left', dx: -1, dy: 0 }
+    ];
+    
+    const dirIndices = { 'up': 0, 'right': 1, 'down': 2, 'left': 3 };
+    const lastDirIndex = dirIndices[ghost.direction] || 0;
+    
+    // Try directions in clockwise or counterclockwise order
+    const order = ghost.wallFollowDir === 'clockwise' ? 
+        [(lastDirIndex + 1) % 4, (lastDirIndex + 2) % 4, (lastDirIndex + 3) % 4, lastDirIndex] : 
+        [(lastDirIndex + 3) % 4, (lastDirIndex + 2) % 4, (lastDirIndex + 1) % 4, lastDirIndex];
+    
+    for (const idx of order) {
+      const dir = directions[idx];
+      const newX = ghost.x + dir.dx * ghost.speed * 1;
+      const newY = ghost.y + dir.dy * ghost.speed * 1;
+      
+      let blocked = false;
+      const ghostAtNewPos = {
+        x: newX, y: newY, width: ghost.width, height: ghost.height
+      };
+      
+      // Check wall collisions
+      for (const wall of walls) {
+        if (checkCollision(ghostAtNewPos, wall)) {
+          blocked = true;
+          break;
+        }
+      }
+      
+      // Check boundaries
+      if (isMobile()) {
+        if (newX < 10 || newX + ghost.width > 540 || 
+            newY < 10 || newY + ghost.height > 860) {
+          blocked = true;
+        }
+      } else {
+        if (newX < 20 || newX + ghost.width > 780 || 
+            newY < 20 || newY + ghost.height > 480) {
+          blocked = true;
+        }
+      }
+      
+      if (!blocked) {
+        return directions[idx].name;
+      }
+    }
+    
+    return null;
+  }
+  
+  // If we found a path with Dijkstra, exit wall-following mode
+  ghost.wallFollowing = false;
+  return nextDirection;
+}
+
+// Function to check if Pac-Man is in the top right corner (Easter Egg condition)
+function isInTopRightCorner() {
+  if (isMobile()) {
+    // For mobile: define the top right corner area
+    return pacman.x > 480 && pacman.y < 70;
+  } else {
+    // For desktop: define the top right corner area
+    return pacman.x > 720 && pacman.y < 60;
+  }
+}
+
+// Function to spawn the special ghost (Easter Egg)
+function spawnSpecialGhost() {
+  if (easterEggTriggered) return; // Only trigger once per game
+  
+  easterEggTriggered = true;
+  
+  // Create a "surprise" sound effect
+  const surpriseSound = new Audio();
+  surpriseSound.src = 'assets/surprise.mp3'; // Optional: add a sound effect
+  try {
+    surpriseSound.play().catch(e => console.log('Audio play prevented:', e));
+  } catch (e) {
+    console.log('Audio error:', e);
+  }
+  
+  // Add new ghost to the ghosts array
+  const specialGhost = {
+    x: isMobile() ? 250 : 420, // Position in ghost house
+    y: isMobile() ? 440 : 270, // Position in ghost house
+    width: 28,
+    height: 28,
+    speed: 0.1, // Slightly faster than regular ghosts
+    baseSpeed: 0.1,
+    direction: 'up',
+    lastShotTime: 0,
+    isSpecial: true, // Flag to identify special ghost
+    // For stability tracking
+    lastDirection: null,
+    directionTimer: 0,
+    stuckCounter: 0
+  };
+  
+  ghosts.push(specialGhost);
+  
+  // Show a small notification
+  const notification = document.createElement('div');
+  notification.textContent = "Easter Egg Found: TANUKI Ghost Awakened!";
+  notification.style.position = "absolute";
+  notification.style.top = "80px";
+  notification.style.left = "50%";
+  notification.style.transform = "translateX(-50%)";
+  notification.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+  notification.style.color = "#ff0000";
+  notification.style.padding = "10px";
+  notification.style.borderRadius = "5px";
+  notification.style.zIndex = "1000";
+  notification.style.fontFamily = "'Press Start 2P', monospace";
+  notification.style.fontSize = "12px";
+  document.body.appendChild(notification);
+  
+  // Remove notification after a few seconds
+  setTimeout(() => {
+    document.body.removeChild(notification);
+  }, 3000);
 }
 
 // Enhanced safe pellet placement
@@ -671,114 +1012,173 @@ function updateGhosts() {
   for (const ghost of ghosts) {
     const prevX = ghost.x;
     const prevY = ghost.y;
-    let movedHorizontally = false;
-    let movedVertically = false;
     
-    // Calculate distances to Pacman
-    const distX = pacman.x - ghost.x;
-    const distY = pacman.y - ghost.y;
-    const absDistX = Math.abs(distX);
-    const absDistY = Math.abs(distY);
+    // Initialize direction stability tracking if it doesn't exist
+    if (ghost.lastDirection === undefined) {
+      ghost.lastDirection = null;
+      ghost.directionTimer = 0;
+      ghost.stuckCounter = 0;
+    }
     
-    // Determine primary movement direction based on which distance is greater
-    const movePrimaryVertical = absDistY > absDistX;
+    // Find best direction to move using Dijkstra's algorithm
+    const bestDirection = findBestDirection(ghost, pacman.x, pacman.y);
     
-    // Try primary direction first
-    if (movePrimaryVertical) {
-      // Try vertical movement first
-      if (distY !== 0) {
-        ghost.y += Math.sign(distY) * ghost.speed;
-        
-        // Check for wall collision
-        let hitWall = false;
-        for (const wall of walls) {
-          if (checkCollision(ghost, wall)) {
-            ghost.y = prevY; // Revert vertical movement
-            hitWall = true;
-            break;
+    // Add directional stability to prevent vibration
+    // Only change direction after a minimum time has passed
+    const now = Date.now();
+    if (bestDirection !== ghost.lastDirection) {
+      // If we've been in the current direction for less than the threshold
+      if (ghost.directionTimer > 0 && now - ghost.directionTimer < 250) {
+        // Continue in the same direction to prevent vibration
+        // unless we're completely stuck
+        if (ghost.stuckCounter < 5) {
+          // Continue with last direction
+          const dirToUse = ghost.lastDirection;
+          if (dirToUse) {
+            switch (dirToUse) {
+              case 'up':
+                ghost.y -= ghost.speed;
+                break;
+              case 'down':
+                ghost.y += ghost.speed;
+                break;
+              case 'left':
+                ghost.x -= ghost.speed;
+                break;
+              case 'right':
+                ghost.x += ghost.speed;
+                break;
+            }
           }
+        } else {
+          // We've been stuck too long, accept the direction change
+          ghost.lastDirection = bestDirection;
+          ghost.directionTimer = now;
+          ghost.stuckCounter = 0;
         }
-        
-        if (!hitWall) {
-          movedVertically = true;
-        }
-      }
-      
-      // Then try horizontal if vertical didn't collide or if distance is still significant
-      if (distX !== 0 && (!movedVertically || absDistX > 50)) {
-        ghost.x += Math.sign(distX) * ghost.speed;
-        
-        // Check for wall collision
-        for (const wall of walls) {
-          if (checkCollision(ghost, wall)) {
-            ghost.x = prevX; // Revert horizontal movement
-            break;
-          }
-        }
-      }
-    } 
-    else {
-      // Try horizontal movement first
-      if (distX !== 0) {
-        ghost.x += Math.sign(distX) * ghost.speed;
-        
-        // Check for wall collision
-        let hitWall = false;
-        for (const wall of walls) {
-          if (checkCollision(ghost, wall)) {
-            ghost.x = prevX; // Revert horizontal movement
-            hitWall = true;
-            break;
-          }
-        }
-        
-        if (!hitWall) {
-          movedHorizontally = true;
-        }
-      }
-      
-      // Then try vertical if horizontal didn't collide or if distance is still significant
-      if (distY !== 0 && (!movedHorizontally || absDistY > 50)) {
-        ghost.y += Math.sign(distY) * ghost.speed;
-        
-        // Check for wall collision
-        for (const wall of walls) {
-          if (checkCollision(ghost, wall)) {
-            ghost.y = prevY; // Revert vertical movement
-            break;
-          }
-        }
+      } else {
+        // Enough time has passed, allow direction change
+        ghost.lastDirection = bestDirection;
+        ghost.directionTimer = now;
+        ghost.stuckCounter = 0;
       }
     }
     
-    // If ghost is stuck (didn't move in either direction), try random movement
-    if (ghost.x === prevX && ghost.y === prevY) {
-      // Pick a random direction
-      const directions = ['up', 'down', 'left', 'right'];
-      const randomDir = directions[Math.floor(Math.random() * directions.length)];
+    // If we have a direction to move in, try to move
+    const directionToUse = ghost.lastDirection || bestDirection;
+    if (directionToUse) {
+      const originalX = ghost.x;
+      const originalY = ghost.y;
       
-      switch (randomDir) {
+      // Apply movement based on the chosen direction
+      switch (directionToUse) {
         case 'up':
-          ghost.y -= ghost.speed * 2;
+          ghost.y -= ghost.speed;
           break;
         case 'down':
-          ghost.y += ghost.speed * 2;
+          ghost.y += ghost.speed;
           break;
         case 'left':
-          ghost.x -= ghost.speed * 2;
+          ghost.x -= ghost.speed;
           break;
         case 'right':
-          ghost.x += ghost.speed * 2;
+          ghost.x += ghost.speed;
           break;
       }
       
-      // Make sure we didn't move into a wall
+      // Check for collisions after moving
+      let hitWall = false;
       for (const wall of walls) {
         if (checkCollision(ghost, wall)) {
-          ghost.x = prevX;
-          ghost.y = prevY;
+          hitWall = true;
           break;
         }
+      }
+      
+      // Check boundaries too
+      if (isMobile()) {
+        if (ghost.x < 10 || ghost.x + ghost.width > 540 || 
+            ghost.y < 10 || ghost.y + ghost.height > 860) {
+          hitWall = true;
+        }
+      } else {
+        if (ghost.x < 20 || ghost.x + ghost.width > 780 || 
+            ghost.y < 20 || ghost.y + ghost.height > 480) {
+          hitWall = true;
+        }
+      }
+      
+      // If we hit a wall, revert position
+      if (hitWall) {
+        ghost.x = prevX;
+        ghost.y = prevY;
+      }
+      
+      // If we didn't move at all, we might be stuck
+      if (ghost.x === originalX && ghost.y === originalY) {
+        ghost.stuckCounter++;
+      } else {
+        ghost.stuckCounter = 0; // Reset stuck counter if we moved
+      }
+    }
+    
+    // If ghost is completely stuck (didn't move for several frames), try random movement as fallback
+    if (ghost.stuckCounter >= 10) {
+      const directions = ['up', 'down', 'left', 'right'];
+      // Try to avoid choosing the same direction
+      const filteredDirs = directions.filter(d => d !== ghost.lastDirection);
+      const randomDir = filteredDirs[Math.floor(Math.random() * filteredDirs.length)] || directions[Math.floor(Math.random() * directions.length)];
+      
+      // Try moving in the random direction
+      const originalX = ghost.x;
+      const originalY = ghost.y;
+      
+      switch (randomDir) {
+        case 'up':
+          ghost.y -= ghost.speed * 1;
+          break;
+        case 'down':
+          ghost.y += ghost.speed * 1;
+          break;
+        case 'left':
+          ghost.x -= ghost.speed * 1;
+          break;
+        case 'right':
+          ghost.x += ghost.speed * 1;
+          break;
+      }
+      
+      // Check if the random movement hit a wall
+      let randomHitWall = false;
+      for (const wall of walls) {
+        if (checkCollision(ghost, wall)) {
+          randomHitWall = true;
+          break;
+        }
+      }
+      
+      // Check boundaries for random movement too
+      if (isMobile()) {
+        if (ghost.x < 10 || ghost.x + ghost.width > 540 || 
+            ghost.y < 10 || ghost.y + ghost.height > 860) {
+          randomHitWall = true;
+        }
+      } else {
+        if (ghost.x < 20 || ghost.x + ghost.width > 780 || 
+            ghost.y < 20 || ghost.y + ghost.height > 480) {
+          randomHitWall = true;
+        }
+      }
+      
+      // If random movement hit a wall, revert position
+      if (randomHitWall) {
+        ghost.x = originalX;
+        ghost.y = originalY;
+      } else {
+        // Random movement worked, use this as the new direction
+        ghost.lastDirection = randomDir;
+        ghost.directionTimer = Date.now();
+        ghost.stuckCounter = 0;
       }
     }
     
@@ -864,6 +1264,11 @@ function closeGotYouPopup() {
 ********************/
 
 function updateGame() {
+  // Check for Easter Egg condition
+  if (!easterEggTriggered && isInTopRightCorner()) {
+    spawnSpecialGhost();
+  }
+  
   // Update ghosts
   updateGhosts();
   
@@ -991,12 +1396,24 @@ function drawGame() {
 
   // Draw ghosts
   for (const ghost of ghosts) {
-    if (ghostImg.complete) {
-      ctx.drawImage(ghostImg, ghost.x, ghost.y, ghost.width, ghost.height);
+    if (ghost.isSpecial) {
+      // Draw special ghost with different image
+      if (specialGhostImg.complete) {
+        ctx.drawImage(specialGhostImg, ghost.x, ghost.y, ghost.width, ghost.height);
+      } else {
+        // Fallback: pink square for special ghost
+        ctx.fillStyle = 'magenta';
+        ctx.fillRect(ghost.x, ghost.y, ghost.width, ghost.height);
+      }
     } else {
-      // Fallback: red square
-      ctx.fillStyle = 'red';
-      ctx.fillRect(ghost.x, ghost.y, ghost.width, ghost.height);
+      // Draw regular ghost
+      if (ghostImg.complete) {
+        ctx.drawImage(ghostImg, ghost.x, ghost.y, ghost.width, ghost.height);
+      } else {
+        // Fallback: red square
+        ctx.fillStyle = 'red';
+        ctx.fillRect(ghost.x, ghost.y, ghost.width, ghost.height);
+      }
     }
   }
 
@@ -1041,11 +1458,15 @@ function startGame() {
   score = 0;
   lives = 3;
   ghostsCanShoot = false;
+  easterEggTriggered = false; // Reset easter egg on game start
   
   // Reset ghost speeds to base speed
   for (const ghost of ghosts) {
     ghost.speed = ghost.baseSpeed;
   }
+  
+  // Reset ghosts array to initial state (removing any special ghosts)
+  ghosts.length = 2;
   
   resetPositions();
   placePelletSafely();
