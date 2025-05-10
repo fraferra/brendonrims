@@ -196,11 +196,11 @@ function scaleCanvas() {
     if (container) {
       container.style.width = '100%';
       container.style.height = '100vh';
-      container.style.display = 'block'; // Changed from flex to block
+      container.style.display = 'block'; 
       container.style.position = 'relative';
       container.style.overflow = 'hidden';
       container.style.paddingTop = '0';
-      container.style.paddingBottom = '15vh'; // Space for controls
+      container.style.paddingBottom = '0'; // Remove padding that was reserved for controls
       
       // Remove any wrappers
       if (document.getElementById('canvasWrapper')) {
@@ -212,11 +212,10 @@ function scaleCanvas() {
       }
     }
     
-    // Ensure the control panel stays at the bottom
+    // Hide the control panel if it exists
     const controlPanel = document.querySelector('.control-panel');
     if (controlPanel) {
-      controlPanel.style.bottom = '2vh';
-      controlPanel.style.zIndex = '1000';
+      controlPanel.style.display = 'none';
     }
   } else {
     // Desktop scaling - set canvas to fixed size and center it
@@ -1569,29 +1568,6 @@ document.addEventListener('keydown', (e) => {
   movePacman(direction);
 });
 
-// Optional mobile controls
-// Desktop keydown event listener
-document.addEventListener('keydown', (e) => {
-  let direction = null;
-  switch (e.key) {
-    case 'ArrowUp':
-      direction = 'up';
-      break;
-    case 'ArrowDown':
-      direction = 'down';
-      break;
-    case 'ArrowLeft':
-      direction = 'left';
-      break;
-    case 'ArrowRight':
-      direction = 'right';
-      break;
-    default:
-      return;
-  }
-  movePacman(direction);
-});
-
 // ***** New Mobile Control Code for Continuous Movement *****
 let moveInterval = null;
 
@@ -1691,70 +1667,6 @@ function stopSwipeMoving() {
   clearInterval(swipeMoveInterval);
   swipeMoveInterval = null;
 }
-
-// Attach touch events for each control button
-const upBtn = document.getElementById('upBtn');
-const downBtn = document.getElementById('downBtn');
-const leftBtn = document.getElementById('leftBtn');
-const rightBtn = document.getElementById('rightBtn');
-
-if (upBtn) {
-  upBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startMoving('up');
-  });
-  upBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopMoving();
-  });
-}
-
-if (downBtn) {
-  downBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startMoving('down');
-  });
-  downBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopMoving();
-  });
-}
-
-if (leftBtn) {
-  leftBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startMoving('left');
-  });
-  leftBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopMoving();
-  });
-}
-
-if (rightBtn) {
-  rightBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startMoving('right');
-  });
-  rightBtn.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    stopMoving();
-  });
-}
-// ***** End of New Mobile Control Code *****
-
-// Start game after username is entered
-document.getElementById('startGame').addEventListener('click', () => {
-  const username = document.getElementById('usernameInput').value.trim();
-  if (username) {
-    document.getElementById('usernamePrompt').style.display = 'none';
-    document.getElementById('gameContainer').style.display = 'block';
-    startGame();
-  } else {
-    alert('Please enter a username.');
-  }
-});
-
 
 // Start game after username is entered
 document.getElementById('startGame').addEventListener('click', () => {

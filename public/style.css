@@ -126,6 +126,11 @@ p {
     margin: 0 auto 1rem auto;
     text-align: center;
   }
+  
+  /* Extra utility class to hide elements on mobile */
+  .mobile-hidden {
+    display: none !important;
+  }
 }
 
 /* Hide game until after name entry */
@@ -234,7 +239,7 @@ p {
   
   #gameCanvas {
     max-width: 100%; /* Make sure canvas doesn't overflow horizontally */
-    max-height: 80vh; /* Reduce max height to ensure it fits on screen */
+    max-height: 100vh; /* Use full height instead of 80vh */
     height: auto; /* Let height adjust naturally */
     margin: 0 auto; /* Center horizontally */
     position: relative;
@@ -242,17 +247,9 @@ p {
     transform-origin: center center !important; /* Center transform origin */
   }
   
+  /* Hide control panel completely on mobile - we're using swipe controls */
   .control-panel {
-    position: fixed;
-    bottom: 2vh; /* Position closer to bottom */
-    width: 90%;
-    background-color: rgba(0,0,0,0.6);
-    padding: 10px 0;
-    border-radius: 20px;
-    margin: 0 auto;
-    left: 5%;
-    right: 5%;
-    z-index: 200;
+    display: none !important;
   }
 }
 
