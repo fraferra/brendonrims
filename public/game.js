@@ -809,7 +809,7 @@ function spawnSpecialGhost() {
   
   // Add text content
   const textElement = document.createElement('div');
-  textElement.textContent = "Easter Egg Found: TANUKI Ghost Awakened!";
+  textElement.textContent = "Easter Egg Found: TANUKI Awakened!";
   
   // Add ghost image
   const ghostImage = document.createElement('img');
