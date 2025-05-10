@@ -126,11 +126,6 @@ p {
     margin: 0 auto 1rem auto;
     text-align: center;
   }
-  
-  /* Extra utility class to hide elements on mobile */
-  .mobile-hidden {
-    display: none !important;
-  }
 }
 
 /* Hide game until after name entry */

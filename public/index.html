@@ -69,17 +69,11 @@
     <!-- GAME AREA (hidden until you click START) -->
     <div class="game-container" id="gameContainer">
       <canvas id="gameCanvas"></canvas>
-      
-      <!-- Add mobile-hidden class to control panel so it can be hidden via CSS as well -->
-      <div class="control-panel mobile-hidden">
-        <!-- You can keep the button elements here since our JS will hide them,
-             but adding the mobile-hidden class ensures they're hidden via CSS too -->
-        <button id="upBtn" class="control-btn">↑</button>
-        <div class="horizontal-controls">
-          <button id="leftBtn" class="control-btn">←</button>
-          <button id="rightBtn" class="control-btn">→</button>
-        </div>
-        <button id="downBtn" class="control-btn">↓</button>
+      <div class="control-panel">
+        <button class="control-btn" id="leftBtn">◀</button>
+        <button class="control-btn" id="upBtn">▲</button>
+        <button class="control-btn" id="downBtn">▼</button>
+        <button class="control-btn" id="rightBtn">▶</button>
       </div>
     </div>
   </div>
