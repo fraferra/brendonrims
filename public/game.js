@@ -304,8 +304,8 @@ const ghosts = [
     y: 240, 
     width: 28,
     height: 28,
-    speed: 0.15, // Base speed
-    baseSpeed: 0.15, // Store original speed for resets
+    speed: 0.20, // Base speed
+    baseSpeed: 0.20, // Store original speed for resets
     direction: 'right', // Track direction for shooting
     lastShotTime: 0, // Track when ghost last shot
   },
@@ -314,8 +314,8 @@ const ghosts = [
     y: 240,
     width: 28,
     height: 28,
-    speed: 0.15, // Base speed
-    baseSpeed: 0.15, // Store original speed for resets
+    speed: 0.20, // Base speed
+    baseSpeed: 0.20, // Store original speed for resets
     direction: 'left', // Track direction for shooting
     lastShotTime: 0, // Track when ghost last shot
   }
@@ -673,8 +673,8 @@ function spawnSpecialGhost() {
     y: isMobile() ? 440 : 270, // Position in ghost house
     width: 28,
     height: 28,
-    speed: 0.1, // Slightly faster than regular ghosts
-    baseSpeed: 0.1,
+    speed: 0.2, // Slightly faster than regular ghosts
+    baseSpeed: 0.2,
     direction: 'up',
     lastShotTime: 0,
     isSpecial: true, // Flag to identify special ghost
