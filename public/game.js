@@ -862,35 +862,17 @@ function spawnNewGhost() {
   while (!validPosition && attempts < maxAttempts) {
     attempts++;
     
-    // Different spawn positions based on device
+    // Always use top left corner for spawning
     if (isMobile()) {
-      // For mobile, try to spawn in various areas of the maze
-      const spawnAreas = [
-        { x: 50, y: 50, width: 100, height: 100 }, // Top left
-        { x: 400, y: 50, width: 100, height: 100 }, // Top right
-        { x: 50, y: 700, width: 100, height: 100 }, // Bottom left
-        { x: 400, y: 700, width: 100, height: 100 }, // Bottom right
-        { x: 250, y: 440, width: 50, height: 30 }   // Ghost house
-      ];
-      
-      // Select a random spawn area
-      const spawnArea = spawnAreas[Math.floor(Math.random() * spawnAreas.length)];
+      // Top left corner for mobile
+      const spawnArea = { x: 50, y: 50, width: 100, height: 100 };
       
       // Generate random coordinates within the spawn area
       newGhost.x = spawnArea.x + Math.floor(Math.random() * spawnArea.width);
       newGhost.y = spawnArea.y + Math.floor(Math.random() * spawnArea.height);
     } else {
-      // For desktop, use similar approach with appropriate coordinates
-      const spawnAreas = [
-        { x: 50, y: 50, width: 100, height: 50 },    // Top left
-        { x: 650, y: 50, width: 100, height: 50 },   // Top right
-        { x: 50, y: 400, width: 100, height: 50 },   // Bottom left
-        { x: 650, y: 400, width: 100, height: 50 },  // Bottom right
-        { x: 350, y: 260, width: 100, height: 30 }   // Ghost house
-      ];
-      
-      // Select a random spawn area
-      const spawnArea = spawnAreas[Math.floor(Math.random() * spawnAreas.length)];
+      // Top left corner for desktop
+      const spawnArea = { x: 50, y: 50, width: 100, height: 50 };
       
       // Generate random coordinates within the spawn area
       newGhost.x = spawnArea.x + Math.floor(Math.random() * spawnArea.width);
@@ -917,14 +899,16 @@ function spawnNewGhost() {
     }
   }
   
-  // If couldn't find valid position after several attempts, use ghost house
+  // If couldn't find valid position after several attempts, use fixed fallback positions in top left
   if (!validPosition) {
     if (isMobile()) {
-      newGhost.x = 250;
-      newGhost.y = 440;
+      // Fixed top left position for mobile
+      newGhost.x = 60;
+      newGhost.y = 60;
     } else {
-      newGhost.x = 400;
-      newGhost.y = 260;
+      // Fixed top left position for desktop
+      newGhost.x = 60;
+      newGhost.y = 40;
     }
   }
   
