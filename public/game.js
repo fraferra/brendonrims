@@ -181,7 +181,7 @@ function scaleCanvas() {
   if (isMobile()) {
     // Mobile-specific scaling - increased by 15% and aligned to top
     const baseScale = Math.min(window.innerWidth / 550, window.innerHeight / 880);
-    const scale = baseScale * 1.15; // Scale up by 15%
+    const scale = baseScale * 1.20; // Scale up by 15%
     
     // Reset any previous transformations and positioning
     canvas.style.transform = '';
@@ -215,21 +215,23 @@ function scaleCanvas() {
       }
     }
     
-    // Show the control panel on mobile with proper styling
+    // Show the control panel on mobile with proper styling - Adding !important to override any CSS rules
     const controlPanel = document.querySelector('.control-panel');
     if (controlPanel) {
-      controlPanel.style.display = 'flex';
-      controlPanel.style.position = 'fixed';
-      controlPanel.style.bottom = '20px';
-      controlPanel.style.left = '50%';
-      controlPanel.style.transform = 'translateX(-50%)';
-      controlPanel.style.zIndex = '100';
-      controlPanel.style.backgroundColor = 'rgba(0,0,0,0.5)';
-      controlPanel.style.padding = '15px';
-      controlPanel.style.borderRadius = '15px';
-      controlPanel.style.width = '80%';
-      controlPanel.style.maxWidth = '300px';
-      controlPanel.style.justifyContent = 'center';
+      controlPanel.style.cssText = `
+        display: flex !important;
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 1000 !important;
+        background-color: rgba(0,0,0,0.6) !important;
+        padding: 15px !important;
+        border-radius: 15px !important;
+        width: 90% !important;
+        max-width: 350px !important;
+        justify-content: space-around !important;
+      `;
     }
   } else {
     // Desktop scaling - set canvas to fixed size and center it
@@ -708,8 +710,8 @@ function spawnSpecialGhost() {
     y: isMobile() ? 440 : 270, // Position in ghost house
     width: 28,
     height: 28,
-    speed: 0.3, // Slightly faster than regular ghosts
-    baseSpeed: 0.3,
+    speed: 2, // Slightly faster than regular ghosts
+    baseSpeed: 0.2,
     direction: 'up',
     lastShotTime: 0,
     isSpecial: true, // Flag to identify special ghost
@@ -776,8 +778,8 @@ function spawnNewGhost() {
   const newGhost = {
     width: 28,
     height: 28,
-    speed: 0.3 * speedMultiplier, // Speed increases with score
-    baseSpeed: 0.3 * speedMultiplier, // Store original speed for resets
+    speed: 0.2 * speedMultiplier, // Speed increases with score
+    baseSpeed: 0.2 * speedMultiplier, // Store original speed for resets
     direction: ['up', 'down', 'left', 'right'][Math.floor(Math.random() * 4)], // Random direction
     lastShotTime: 0,
     // For stability tracking
@@ -887,7 +889,7 @@ function spawnNewGhost() {
   notification.style.zIndex = '1000';
   notification.style.fontFamily = "'Press Start 2P', monospace";
   notification.style.fontSize = '12px';
-  notification.innerHTML = 'New Ghost Appeared!';
+  notification.innerHTML = 'New EMMA Appeared!';
   
   document.body.appendChild(notification);
   
@@ -1662,8 +1664,8 @@ function startGame() {
     y: isMobile() ? 440 : 240,
     width: 28,
     height: 28,
-    speed: 0.3,
-    baseSpeed: 0.3,
+    speed: 0.2,
+    baseSpeed: 0.2,
     direction: 'right',
     lastShotTime: 0,
     color: '#FF0000' // Red ghost
@@ -1674,8 +1676,8 @@ function startGame() {
     y: isMobile() ? 440 : 240,
     width: 28,
     height: 28,
-    speed: 0.3,
-    baseSpeed: 0.3,
+    speed: 0.2,
+    baseSpeed: 0.2,
     direction: 'left', 
     lastShotTime: 0,
     color: '#00FFFF' // Cyan ghost
