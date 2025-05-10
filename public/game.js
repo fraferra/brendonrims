@@ -183,7 +183,6 @@ function setupCanvas() {
         left: 50% !important;
         transform: translateX(-50%) !important;
         z-index: 1000 !important;
-        background-color: rgba(0,0,0,0.6) !important;
         padding: 15px !important;
         border-radius: 15px !important;
         width: 90% !important;
@@ -268,7 +267,7 @@ function scaleCanvas() {
         left: 50% !important;
         transform: translateX(-50%) !important;
         z-index: 1000 !important;
-        background-color: rgba(0,0,0,0.6) !important;
+        background-color: transparent !important;
         padding: 15px !important;
         border-radius: 15px !important;
         width: 90% !important;
